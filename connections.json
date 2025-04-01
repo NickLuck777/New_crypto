@@ -1,0 +1,50 @@
+{
+  "postgres_con": {
+    "conn_type": "postgres",
+    "description": "Подключение к базе данных postgres",
+    "login": "user",
+    "password": "password",
+    "host": "postgres_prod",
+    "port": 5432,
+    "schema": "test",
+    "extra": "{}"
+ },
+  "clickhouse_conn": {
+    "conn_type": "http",
+    "description": "Подключение к ClickHouse через clickhouse_connect",
+    "login": "default",
+    "password": "",
+    "host": "clickhouse",
+    "port": 8123,
+    "schema": "",
+    "extra": "{}"
+  },
+  "rabbitmq_conn": {
+    "conn_type": "RabbitMQ",
+    "description": "Подключение к rabbitmq",
+    "login": "nick",
+    "password": "nick",
+    "host": "rabbitmq",
+    "port": 5672,
+    "schema": "",
+    "extra": "{}"
+  },
+  "mongo_conn": {
+    "conn_type": "MongoDB",
+    "description": "Подключение к mongo",
+    "login": "root",
+    "password": "123",
+    "host": "mongo",
+    "port": 27017,
+    "schema": "",
+    "extra": "{}"
+  },
+  "redis_conn": {
+    "conn_type": "redis",
+    "description": "Подключение к redis",
+    "host": "redis_user",
+    "port": 6379,
+    "schema": "",
+    "extra": "{}"
+  }
+}

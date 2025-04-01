@@ -1,0 +1,325 @@
+Шаг 6: Интеграция с Grafana
+Добавь Prometheus как источник данных:
+В Grafana: Configuration → Data Sources → Add data source → Prometheus.
+URL: http://localhost:9090.
+Сохрани и протестируй.
+Создай дашборд для пайплайна:
+Панель "Лаг консьюмеров": kafka_consumergroup_lag{group="connect-cluster", topic="ethereum"}.
+Панель "Записей в PostgreSQL": rate(kafka_connect_sink_records_written[5m]).
+Панель "Ошибки Kafka Connect": kafka_connect_task_error_count{connector="postgres-sink"}.
+Настрой алёрты:
+В Prometheus создай файл alerts.yml:
+yaml
+
+Свернуть
+
+Перенос
+
+Копировать
+groups:
+- name: pipeline_alerts
+  rules:
+  - alert: HighConsumerLag
+    expr: kafka_consumergroup_lag{group="connect-cluster", topic="ethereum"} > 1000
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High consumer lag detected"
+      description: "Lag for topic {{ $labels.topic }} exceeds 1000 messages."
+Добавь в prometheus.yml:
+yaml
+
+Свернуть
+
+Перенос
+
+Копировать
+rule_files:
+  - "/etc/prometheus/alerts.yml"
+Перезапусти Prometheus.
+Подключи алёрты в Grafana:
+Alerting → Notification Channels → добавь Slack/Telegram.
+В дашборде настрой алёрт на панели с kafka_consumergroup_lag.
+Шаг 7: Проверка
+Зайди в Grafana, убедись, что метрики отображаются.
+Проверь Prometheus UI (http://localhost:9090/targets) — все targets должны быть зелёными.
+Итог
+Теперь у тебя есть Prometheus, который мониторит Kafka, Kafka Connect и (опционально) PostgreSQL. Ты можешь видеть лаг, ошибки и производительность в реальном времени через Grafana. Если хочешь помощь с конкретным дашбордом или алёртом — дай знать, настроим пошагово, бро! Что дальше?
+
+
+
+
+
+
+
+бро, у меня всё в docker compose 
+docker-compose.yml
+
+
+
+
+Бро, круто, что у тебя всё в docker-compose — это сильно упрощает настройку Prometheus и интеграцию с твоей инфраструктурой! Я помогу тебе добавить Prometheus и экспортёры (Kafka Exporter, JMX Exporter для Kafka Connect и PostgreSQL Exporter) прямо в твой docker-compose.yml. Мы настроим их так, чтобы они собирали метрики из твоих сервисов (kafka, kafka-connect, postgres_prod) и отдавали их в Grafana. Погнали шаг за шагом!
+
+Что будем делать
+Добавим сервис prometheus в docker-compose.yml.
+Добавим kafka-exporter для метрик Kafka.
+Настроим kafka-connect с JMX Exporter для метрик коннектора.
+Добавим postgres-exporter для метрик PostgreSQL (postgres_prod).
+Убедимся, что Grafana видит Prometheus как источник данных.
+Обновлённый docker-compose.yml
+Я добавлю новые сервисы и подправлю существующие. Вот как это будет выглядеть (добавлю только изменённые/новые части, чтобы не дублировать весь файл):
+
+yaml
+
+Свернуть
+
+Перенос
+
+Копировать
+services:
+  # Существующий Kafka (без изменений, просто для контекста)
+  kafka:
+    image: kafka-custom:latest
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    networks:
+      default:
+        ipv4_address: 172.28.0.10
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@172.28.0.10:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://172.28.0.10:9092,CONTROLLER://172.28.0.10:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.28.0.10:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
+    volumes:
+      - kafka_data:/bitnami/kafka
+
+  # Обновлённый Kafka Connect с JMX Exporter
+  kafka-connect:
+    image: kafka-connect-custom:latest
+    ports:
+      - "8083:8083"
+      - "9999:9999"  # Порт для JMX Exporter
+    depends_on:
+      - kafka
+      - postgres_prod
+      - clickhouse
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components,/connectors"
+      CONNECT_CONFIG_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
+      CONNECT_OFFSET_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
+      CONNECT_STATUS_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
+      # Добавляем JMX Exporter как Java Agent
+      KAFKA_OPTS: "-javaagent:/usr/share/jmx_prometheus_javaagent.jar=9999:/etc/kafka/jmx_config.yml"
+    volumes:
+      - ./KAFKA-CONNECT/connectors:/connectors
+      - ./KAFKA-CONNECT/plugins:/plugins
+      - ./jmx_prometheus_javaagent.jar:/usr/share/jmx_prometheus_javaagent.jar  # Путь к агенту
+      - ./jmx_config.yml:/etc/kafka/jmx_config.yml  # Путь к конфигу JMX
+    command:
+      - /bin/bash
+      - -c
+      - "/usr/local/bin/setup-connect.sh & /etc/confluent/docker/run"
+
+  # Новый сервис: Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_crypto
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    depends_on:
+      - kafka-exporter
+      - kafka-connect
+      - postgres-exporter
+    networks:
+      - default
+
+  # Новый сервис: Kafka Exporter
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka_exporter_crypto
+    ports:
+      - "9308:9308"
+    environment:
+      - KAFKA_BROKER=kafka:9092  # Указываем имя сервиса Kafka
+    depends_on:
+      - kafka
+    networks:
+      - default
+
+  # Новый сервис: PostgreSQL Exporter
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_crypto
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://user:password@postgres_prod:5432/test?sslmode=require
+    depends_on:
+      - postgres_prod
+    networks:
+      - default
+
+  # Существующий Grafana (без изменений, для контекста)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_crypto
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - clickhouse
+      - prometheus  # Добавляем зависимость от Prometheus
+    networks:
+      - default
+
+# Добавляем том для Prometheus
+volumes:
+  postgres-db-volume:
+  postgres_data:
+  clickhouse_data:
+  grafana-data:
+  redis_data:
+  kafka_data:
+  prometheus_data:  # Новый том
+Дополнительные файлы
+1. prometheus.yml
+Создай этот файл в корне проекта:
+
+yaml
+
+Свернуть
+
+Перенос
+
+Копировать
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  - job_name: 'kafka-connect'
+    static_configs:
+      - targets: ['kafka-connect:9999']  # JMX Exporter порт
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+2. jmx_config.yml
+Создай файл для JMX Exporter:
+
+yaml
+
+Свернуть
+
+Перенос
+
+Копировать
+rules:
+  - pattern: "kafka.connect<type=sink-task-metrics, connector=(.+), task=(.+)><>(records-written)"
+    name: "kafka_connect_sink_records_written"
+    labels:
+      connector: "$1"
+      task: "$2"
+  - pattern: "kafka.connect<type=connector-task-metrics, connector=(.+), task=(.+)><>(task-error-count)"
+    name: "kafka_connect_task_error_count"
+    labels:
+      connector: "$1"
+      task: "$2"
+3. Скачай JMX Exporter
+Скачай jmx_prometheus_javaagent-0.20.0.jar:
+
+bash
+
+Свернуть
+
+Перенос
+
+Копировать
+wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.20.0/jmx_prometheus_javaagent-0.20.0.jar -O jmx_prometheus_javaagent.jar
+Положи его в корень проекта рядом с docker-compose.yml.
+
+Шаги настройки
+1. Проверь зависимости
+Убедись, что файлы prometheus.yml, jmx_config.yml и jmx_prometheus_javaagent-0.20.0.jar лежат в корне проекта.
+
+2. Запусти сервисы
+bash
+
+Свернуть
+
+Перенос
+
+Копировать
+docker-compose up -d
+Проверь логи Prometheus:
+bash
+
+Свернуть
+
+Перенос
+
+Копировать
+docker logs prometheus_crypto
+Проверь, что метрики доступны:
+Kafka: curl http://localhost:9308/metrics
+Kafka Connect: curl http://localhost:9999/metrics
+PostgreSQL: curl http://localhost:9187/metrics
+3. Подключи Prometheus к Grafana
+Зайди в Grafana (http://localhost:3000, логин: admin, пароль: admin).
+Добавь источник данных:
+Configuration → Data Sources → Add data source → Prometheus.
+URL: http://prometheus:9090 (имя сервиса в сети Docker).
+Сохрани и протестируй.
+4. Создай дашборд
+Создай новый дашборд: Create → Dashboard → Add Panel.
+Примеры запросов:
+Лаг консьюмеров: kafka_consumergroup_lag{group="connect", topic="ethereum"}.
+Записей в PostgreSQL: rate(kafka_connect_sink_records_written[5m]).
+Ошибки: kafka_connect_task_error_count{connector="postgres-sink"}.
+Проверка
+Открой Prometheus UI: http://localhost:9090/targets — все цели (kafka, kafka-connect, postgres) должны быть зелёными.
+В Grafana убедись, что графики рисуются.
+Что дальше?
+Если хочешь алёрты, добавь alerts.yml в prometheus.yml (как в прошлом сообщении) и настрой их в Grafana.
+Если нужно больше метрик от PostgreSQL (например, задержки запросов), уточни — подскажу, как расширить postgres-exporter.
+Бро, всё готово! Запускай, проверяй, и если что-то не взлетит — кидай логи, разберёмся!

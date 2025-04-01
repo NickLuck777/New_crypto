@@ -1,0 +1,96 @@
+📌 Как записывать real-time данные из PySpark Streaming в ClickHouse?
+Ты прав, каждое новое сообщение из Kafka не должно вставляться в ClickHouse отдельным INSERT – это будет очень неэффективно.
+Вместо этого мы накапливаем данные в PySpark Streaming и записываем их пачками (batch insert).
+
+🔥 Как это работает?
+
+1️⃣ PySpark Streaming получает поток данных из Kafka
+2️⃣ Данные накапливаются в micro-batches
+3️⃣ Каждые N секунд (или N записей) PySpark записывает их пачкой в ClickHouse
+4️⃣ Так работает Spark Structured Streaming + Batch Insert
+
+🔹 Как это реализуется?
+📌 Пример PySpark Streaming → ClickHouse через batch insert
+
+1️⃣ Подключаем PySpark Streaming к Kafka
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, from_json
+from pyspark.sql.types import StructType, StructField, StringType
+import json
+from clickhouse_driver import Client
+
+# 1. Создаём сессию Spark
+spark = SparkSession.builder.appName("KafkaToClickHouse").getOrCreate()
+
+# 2. Определяем схему JSON-сообщений из Kafka
+schema = StructType([
+    StructField("text", StringType(), True),
+    StructField("timestamp", StringType(), True),
+    StructField("sentiment", StringType(), True)
+])
+
+# 3. Читаем поток данных из Kafka
+df = spark.readStream.format("kafka") \
+    .option("kafka.bootstrap.servers", "localhost:9092") \
+    .option("subscribe", "telegram_stream") \
+    .load()
+
+# 4. Преобразуем Kafka JSON в DataFrame
+df = df.selectExpr("CAST(value AS STRING)").select(from_json(col("value"), schema).alias("data")).select("data.*")
+
+✅ Теперь PySpark получает данные в режиме стрима.
+
+2️⃣ Делаем Batch Insert в ClickHouse
+Теперь нам нужно накопить записи и записывать их пачками.
+
+📌 Используем foreachBatch для записи данных в ClickHouse
+
+def write_to_clickhouse(batch_df, batch_id):
+    """Функция записи в ClickHouse"""
+    if batch_df.count() > 0:  # Проверяем, есть ли данные в батче
+        # Преобразуем DataFrame в список кортежей
+        data = [(row["text"], row["timestamp"], row["sentiment"]) for row in batch_df.collect()]
+        
+        # Подключаемся к ClickHouse
+        clickhouse_client = Client("localhost")
+        
+        # Делаем batch insert
+        clickhouse_client.execute("INSERT INTO telegram_sentiment (text, timestamp, sentiment) VALUES", data)
+        print(f"Inserted {len(data)} rows into ClickHouse")
+
+# 5. Передаём данные в обработку batch insert
+df.writeStream \
+    .foreachBatch(write_to_clickhouse) \
+    .outputMode("append") \
+    .start() \
+    .awaitTermination()
+	
+✅ Теперь каждые N секунд (по умолчанию 10 секунд) данные вставляются в ClickHouse пачками.
+
+🔹 Как это работает?
+
+1️⃣ PySpark собирает новые данные в micro-batches
+2️⃣ Каждые 10 секунд (или другой интервал) пачка записей передаётся в write_to_clickhouse()
+3️⃣ В этой функции список сообщений передаётся одним INSERT в ClickHouse
+4️⃣ Оптимально для производительности!
+
+📌 Оптимизация batch insert в ClickHouse
+✅ Настроить размер batch insert
+Если данных много, можно изменить размер микробатчей:
+
+df.writeStream \
+    .foreachBatch(write_to_clickhouse) \
+    .trigger(processingTime="5 seconds") \  # Вставка каждые 5 секунд
+    .outputMode("append") \
+    .start() \
+    .awaitTermination()
+✅ Оптимизировать insert через batch_size в ClickHouse
+Можно использовать большие батчи (1000+ записей за раз):
+
+clickhouse_client.execute("INSERT INTO telegram_sentiment FORMAT JSONEachRow", data, settings={"max_insert_block_size": 1000})
+📌 Итог
+🔥 Теперь PySpark Streaming вставляет данные в ClickHouse не по одному, а батчами!
+✅ Используем foreachBatch() вместо foreach() для эффективной вставки
+✅ Каждые N секунд вставляем пачку данных в ClickHouse
+✅ Работает быстро, не нагружая базу маленькими insert'ами

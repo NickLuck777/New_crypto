@@ -1,0 +1,16 @@
+import feedparser
+
+# RSS-ленты крипто-новостей
+rss_feeds = [
+    "https://cointelegraph.com/rss",
+    "https://www.coindesk.com/arc/outboundfeeds/rss/"
+]
+
+# Читаем новости
+for feed_url in rss_feeds:
+    feed = feedparser.parse(feed_url)
+    for entry in feed.entries[:5]:  # Читаем 5 свежих новостей
+        print(f"Title: {entry.title}")
+        print(f"Link: {entry.link}")
+        print(f"Published: {entry.published}")
+        print(f"Summary: {entry.summary}\n")

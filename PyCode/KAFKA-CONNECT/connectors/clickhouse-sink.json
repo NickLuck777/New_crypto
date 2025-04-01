@@ -1,0 +1,21 @@
+{
+  "name": "clickhouse-sink",
+  "config": {
+    "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
+    "tasks.max": "1",
+    "topics": "bitcoin,ethereum,solana",
+    "hostname": "clickhouse",
+    "port": "8123",
+    "database": "blockchain_db",
+    "username": "default",
+    "password": "",
+    "autoCreateTables": "true",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "true",
+    "value.converter.schemas.enable": "true",
+    "exactlyOnce": "true",
+    "timeoutMs": "30000",
+    "retries": "5"
+  }
+}
