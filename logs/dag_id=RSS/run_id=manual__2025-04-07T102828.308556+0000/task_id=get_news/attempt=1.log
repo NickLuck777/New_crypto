@@ -1,0 +1,30 @@
+[2025-04-07T10:28:31.857+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-04-07T10:28:31.879+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: RSS.get_news manual__2025-04-07T10:28:28.308556+00:00 [queued]>
+[2025-04-07T10:28:31.886+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: RSS.get_news manual__2025-04-07T10:28:28.308556+00:00 [queued]>
+[2025-04-07T10:28:31.887+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2025-04-07T10:28:31.899+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): get_news> on 2025-04-07 10:28:28.308556+00:00
+[2025-04-07T10:28:31.906+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=83) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-04-07T10:28:31.908+0000] {standard_task_runner.py:63} INFO - Started process 84 to run task
+[2025-04-07T10:28:31.909+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'RSS', 'get_news', 'manual__2025-04-07T10:28:28.308556+00:00', '--job-id', '128', '--raw', '--subdir', 'DAGS_FOLDER/RSS_DAG - Copy.py', '--cfg-path', '/tmp/tmpus6_cco4']
+[2025-04-07T10:28:31.910+0000] {standard_task_runner.py:91} INFO - Job 128: Subtask get_news
+[2025-04-07T10:28:31.950+0000] {task_command.py:426} INFO - Running <TaskInstance: RSS.get_news manual__2025-04-07T10:28:28.308556+00:00 [running]> on host 30d2f34b5b81
+[2025-04-07T10:28:32.023+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='user' AIRFLOW_CTX_DAG_ID='RSS' AIRFLOW_CTX_TASK_ID='get_news' AIRFLOW_CTX_EXECUTION_DATE='2025-04-07T10:28:28.308556+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-04-07T10:28:28.308556+00:00'
+[2025-04-07T10:28:32.024+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-04-07T10:28:32.049+0000] {connection_workflow.py:179} INFO - Pika version 1.3.2 connecting to ('172.28.0.7', 5672)
+[2025-04-07T10:28:32.050+0000] {io_services_utils.py:345} INFO - Socket connected: <socket.socket fd=93, family=2, type=1, proto=6, laddr=('172.28.0.6', 43470), raddr=('172.28.0.7', 5672)>
+[2025-04-07T10:28:32.052+0000] {connection_workflow.py:428} INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+[2025-04-07T10:28:32.093+0000] {connection_workflow.py:293} INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T10:28:32.094+0000] {connection_workflow.py:725} INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T10:28:32.095+0000] {blocking_connection.py:453} INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T10:28:32.096+0000] {blocking_connection.py:1264} INFO - Created channel=1
+[2025-04-07T10:28:36.865+0000] {base.py:84} INFO - Using connection ID 'redis_conn' for task execution.
+[2025-04-07T10:28:36.879+0000] {channel.py:536} INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T10:28:36.881+0000] {channel.py:1133} INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f9cf0795d60> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T10:28:36.881+0000] {python.py:237} INFO - Done. Returned value was: None
+[2025-04-07T10:28:36.882+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-04-07T10:28:36.889+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=RSS, task_id=get_news, run_id=manual__2025-04-07T10:28:28.308556+00:00, execution_date=20250407T102828, start_date=20250407T102831, end_date=20250407T102836
+[2025-04-07T10:28:36.936+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-04-07T10:28:36.959+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-04-07T10:28:36.963+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

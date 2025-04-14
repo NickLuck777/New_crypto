@@ -1,0 +1,11 @@
+rules:
+  - pattern: "kafka.connect<type=sink-task-metrics, connector=(.+), task=(.+)><>(records-written)"
+    name: "kafka_connect_sink_records_written"
+    labels:
+      connector: "$1"
+      task: "$2"
+  - pattern: "kafka.connect<type=connector-task-metrics, connector=(.+), task=(.+)><>(task-error-count)"
+    name: "kafka_connect_task_error_count"
+    labels:
+      connector: "$1"
+      task: "$2"

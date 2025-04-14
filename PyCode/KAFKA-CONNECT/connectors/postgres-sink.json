@@ -7,7 +7,7 @@
       "connection.url": "jdbc:postgresql://rc1d-t1lz637ht7v0adzm.mdb.yandexcloud.net:6432/blockchain_pg?sslmode=require",
       "connection.user": "user",
       "connection.password": "password",
-      "auto.create": "true",
+      "auto.create": "false",
       "insert.mode": "upsert",
       "pk.mode": "record_key",
       "pk.fields": "hash",

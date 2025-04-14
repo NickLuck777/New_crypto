@@ -4,6 +4,7 @@ USER root
 
 # Установка необходимых коннекторов
 RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:latest 
+#RUN confluent-hub install --no-prompt ./clickhouse-kafka-connect-v1.2.9-confluent.jar
 
 # Копирование скрипта для автоматической настройки
 COPY setup-connect.sh /usr/local/bin/setup-connect.sh

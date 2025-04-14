@@ -7,9 +7,6 @@ RUN chmod +x /usr/local/bin/kafka-setup.sh
 COPY get_eth_data_1_msg.py /usr/local/bin/get_eth_data_1_msg.py
 RUN chmod +x /usr/local/bin/get_eth_data_1_msg.py
 
-COPY get_eth_data.py /usr/local/bin/get_eth_data.py
-RUN chmod +x /usr/local/bin/get_eth_data.py
-
 # Установка Python и создание виртуального окружения
 RUN apt-get update && apt-get install -y \
     python3 \

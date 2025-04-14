@@ -1,0 +1,165 @@
+[2025-04-09T06:51:07.205+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-04-09T06:51:07.224+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: RSS.process_news manual__2025-04-09T06:50:56.361995+00:00 [queued]>
+[2025-04-09T06:51:07.231+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: RSS.process_news manual__2025-04-09T06:50:56.361995+00:00 [queued]>
+[2025-04-09T06:51:07.233+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2025-04-09T06:51:07.246+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): process_news> on 2025-04-09 06:50:56.361995+00:00
+[2025-04-09T06:51:07.258+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=1392) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-04-09T06:51:07.260+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'RSS', 'process_news', 'manual__2025-04-09T06:50:56.361995+00:00', '--job-id', '197', '--raw', '--subdir', 'DAGS_FOLDER/RSS_DAG.py', '--cfg-path', '/tmp/tmpah7tz452']
+[2025-04-09T06:51:07.261+0000] {standard_task_runner.py:63} INFO - Started process 1393 to run task
+[2025-04-09T06:51:07.263+0000] {standard_task_runner.py:91} INFO - Job 197: Subtask process_news
+[2025-04-09T06:51:07.306+0000] {task_command.py:426} INFO - Running <TaskInstance: RSS.process_news manual__2025-04-09T06:50:56.361995+00:00 [running]> on host 5986bb29e517
+[2025-04-09T06:51:07.373+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='user' AIRFLOW_CTX_DAG_ID='RSS' AIRFLOW_CTX_TASK_ID='process_news' AIRFLOW_CTX_EXECUTION_DATE='2025-04-09T06:50:56.361995+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-04-09T06:50:56.361995+00:00'
+[2025-04-09T06:51:07.374+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-04-09T06:51:07.393+0000] {base.py:84} INFO - Using connection ID 'mongo_conn' for task execution.
+[2025-04-09T06:51:07.394+0000] {RSS_DAG.py:159} INFO - Initializing sentiment analysis model...
+[2025-04-09T06:51:07.395+0000] {log.py:232} WARNING - No model was supplied, defaulted to distilbert/distilbert-base-uncased-finetuned-sst-2-english and revision 714eb0f (https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english).
+Using a pipeline without specifying a model name and revision in production is not recommended.
+[2025-04-09T06:51:07.925+0000] {log.py:232} WARNING - Device set to use cpu
+[2025-04-09T06:51:07.926+0000] {RSS_DAG.py:161} INFO - Sentiment analysis model loaded.
+[2025-04-09T06:51:07.931+0000] {base.py:84} INFO - Using connection ID 'redis_conn' for task execution.
+[2025-04-09T06:51:07.934+0000] {RSS_DAG.py:174} INFO - Expecting 56 messages based on Redis counter.
+[2025-04-09T06:51:07.959+0000] {RSS_DAG.py:180} INFO - Connected to MongoDB collection: DB.RSS
+[2025-04-09T06:51:07.961+0000] {connection_workflow.py:179} INFO - Pika version 1.3.2 connecting to ('172.28.0.12', 5672)
+[2025-04-09T06:51:07.962+0000] {io_services_utils.py:345} INFO - Socket connected: <socket.socket fd=84, family=2, type=1, proto=6, laddr=('172.28.0.16', 41810), raddr=('172.28.0.12', 5672)>
+[2025-04-09T06:51:07.963+0000] {connection_workflow.py:428} INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+[2025-04-09T06:51:07.966+0000] {connection_workflow.py:293} INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-09T06:51:07.967+0000] {connection_workflow.py:725} INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-09T06:51:07.968+0000] {blocking_connection.py:453} INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-09T06:51:07.969+0000] {blocking_connection.py:1264} INFO - Created channel=1
+[2025-04-09T06:51:07.972+0000] {RSS_DAG.py:191} INFO - Starting RabbitMQ consumer on queue 'RSS'. Expecting 56 messages...
+[2025-04-09T06:51:08.052+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-odds-outlasting-united-states-dollar-tariffs-crypto-analysts.
+[2025-04-09T06:51:08.055+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-odds-outlasting-united-states-dollar-tariffs-crypto-analysts already exists. Skipping.
+[2025-04-09T06:51:08.069+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/ethereum-whale-sells-eth-after-900-days-missing-27-m-peak-profit.
+[2025-04-09T06:51:08.071+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/ethereum-whale-sells-eth-after-900-days-missing-27-m-peak-profit already exists. Skipping.
+[2025-04-09T06:51:08.083+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/eth-outperforms-btc-just-15-percent-of-time-since-launch.
+[2025-04-09T06:51:08.084+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/eth-outperforms-btc-just-15-percent-of-time-since-launch already exists. Skipping.
+[2025-04-09T06:51:08.096+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/eu-markets-regulator-warns-crypto-may-bring-broader-stability-issues.
+[2025-04-09T06:51:08.097+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/eu-markets-regulator-warns-crypto-may-bring-broader-stability-issues already exists. Skipping.
+[2025-04-09T06:51:08.111+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/ai-agents-virtual-revenue-plunge-token-price-decline.
+[2025-04-09T06:51:08.113+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/ai-agents-virtual-revenue-plunge-token-price-decline already exists. Skipping.
+[2025-04-09T06:51:08.128+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/shaquille-o-neal-gets-ok-11-million-astrals-nft-settlement.
+[2025-04-09T06:51:08.129+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/shaquille-o-neal-gets-ok-11-million-astrals-nft-settlement already exists. Skipping.
+[2025-04-09T06:51:08.142+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/melania-trump-memecoin-team-sold-30-million-bubblemaps.
+[2025-04-09T06:51:08.144+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/melania-trump-memecoin-team-sold-30-million-bubblemaps already exists. Skipping.
+[2025-04-09T06:51:08.156+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/microsoft-office-extension-packages-hide-malware-replaces-crypto-addresses.
+[2025-04-09T06:51:08.158+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/microsoft-office-extension-packages-hide-malware-replaces-crypto-addresses already exists. Skipping.
+[2025-04-09T06:51:08.170+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/trumps-tariffs-lower-bitcoin-miner-price-outside-us.
+[2025-04-09T06:51:08.171+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/trumps-tariffs-lower-bitcoin-miner-price-outside-us already exists. Skipping.
+[2025-04-09T06:51:08.180+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/what-happened-in-crypto-today.
+[2025-04-09T06:51:08.182+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/what-happened-in-crypto-today already exists. Skipping.
+[2025-04-09T06:51:08.195+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/redstone-trading-latency-new-oracle-megaeth.
+[2025-04-09T06:51:08.196+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/redstone-trading-latency-new-oracle-megaeth already exists. Skipping.
+[2025-04-09T06:51:08.209+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-price-could-rally-even-as-global-trade-war-rages-on-here-is-why.
+[2025-04-09T06:51:08.211+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-price-could-rally-even-as-global-trade-war-rages-on-here-is-why already exists. Skipping.
+[2025-04-09T06:51:08.221+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/cboe-files-to-list-canary-sui-etf.
+[2025-04-09T06:51:08.223+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/cboe-files-to-list-canary-sui-etf already exists. Skipping.
+[2025-04-09T06:51:08.235+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-weekly-rsi-hits-bull-market-low-as-trader-sees-70-k-btc-price-bottom.
+[2025-04-09T06:51:08.237+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-weekly-rsi-hits-bull-market-low-as-trader-sees-70-k-btc-price-bottom already exists. Skipping.
+[2025-04-09T06:51:08.254+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/china-counters-tariffs-yuan-devaluation-bullish-btc.
+[2025-04-09T06:51:08.257+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/china-counters-tariffs-yuan-devaluation-bullish-btc already exists. Skipping.
+[2025-04-09T06:51:08.269+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/aavegotchi-gaming-nfts-votes-to-ditch-polygon-for-base.
+[2025-04-09T06:51:08.271+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/aavegotchi-gaming-nfts-votes-to-ditch-polygon-for-base already exists. Skipping.
+[2025-04-09T06:51:08.283+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/ethereum-price-data-highlights-1-000-as-the-final-bottom-for-eth.
+[2025-04-09T06:51:08.285+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/ethereum-price-data-highlights-1-000-as-the-final-bottom-for-eth already exists. Skipping.
+[2025-04-09T06:51:08.297+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/blackrock-partners-anchorage-digital-digital-asset-custody.
+[2025-04-09T06:51:08.299+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/blackrock-partners-anchorage-digital-digital-asset-custody already exists. Skipping.
+[2025-04-09T06:51:08.312+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-futures-divergences-point-to-transitioning-market-are-btc-bulls-accumulating.
+[2025-04-09T06:51:08.314+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-futures-divergences-point-to-transitioning-market-are-btc-bulls-accumulating already exists. Skipping.
+[2025-04-09T06:51:08.330+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-relief-rally-fizzles-as-white-house-confirms-104-china-tariffs-will-btc-fall-to-new-lows.
+[2025-04-09T06:51:08.331+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-relief-rally-fizzles-as-white-house-confirms-104-china-tariffs-will-btc-fall-to-new-lows already exists. Skipping.
+[2025-04-09T06:51:08.343+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/binance-delists-14-tokens-vote-to-delist-process.
+[2025-04-09T06:51:08.345+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/binance-delists-14-tokens-vote-to-delist-process already exists. Skipping.
+[2025-04-09T06:51:08.360+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-rebounds-as-traders-spot-china-weaker-yuan-chart-but-us-trade-war-caps-80-k-btc-rally.
+[2025-04-09T06:51:08.361+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-rebounds-as-traders-spot-china-weaker-yuan-chart-but-us-trade-war-caps-80-k-btc-rally already exists. Skipping.
+[2025-04-09T06:51:08.375+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/ripple-acquisition-hidden-road-xrpl-cto.
+[2025-04-09T06:51:08.377+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/ripple-acquisition-hidden-road-xrpl-cto already exists. Skipping.
+[2025-04-09T06:51:08.388+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/scaling-the-evm-requires-an-l1.
+[2025-04-09T06:51:08.390+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/scaling-the-evm-requires-an-l1 already exists. Skipping.
+[2025-04-09T06:51:08.402+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/crypto-banking-adoption-expected-by-end-of-2025.
+[2025-04-09T06:51:08.403+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/crypto-banking-adoption-expected-by-end-of-2025 already exists. Skipping.
+[2025-04-09T06:51:08.416+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/cboe-launches-new-bitcoin-futures-product.
+[2025-04-09T06:51:08.418+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/cboe-launches-new-bitcoin-futures-product already exists. Skipping.
+[2025-04-09T06:51:08.429+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/dubai-land-department-vara-agreement-real-estate-tokenization.
+[2025-04-09T06:51:08.431+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/dubai-land-department-vara-agreement-real-estate-tokenization already exists. Skipping.
+[2025-04-09T06:51:08.445+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/bitcoin-24-7-liquidity-double-edged-sword-marketturmoil.
+[2025-04-09T06:51:08.446+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/bitcoin-24-7-liquidity-double-edged-sword-marketturmoil already exists. Skipping.
+[2025-04-09T06:51:08.458+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/explained/can-pi-network-succeed-without-listing-on-major-exchanges.
+[2025-04-09T06:51:08.460+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/explained/can-pi-network-succeed-without-listing-on-major-exchanges already exists. Skipping.
+[2025-04-09T06:51:08.471+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/trump-administration-shutters-doj-crypto-enforcement-team.
+[2025-04-09T06:51:08.473+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/trump-administration-shutters-doj-crypto-enforcement-team already exists. Skipping.
+[2025-04-09T06:51:08.488+0000] {RSS_DAG.py:107} INFO - Message with id https://cointelegraph.com/news/twitter-user-claims-tradingview-has-ignored-a-fibonacci-retracement-bug-for-5-years.
+[2025-04-09T06:51:08.490+0000] {RSS_DAG.py:112} INFO - Message with id https://cointelegraph.com/news/twitter-user-claims-tradingview-has-ignored-a-fibonacci-retracement-bug-for-5-years already exists. Skipping.
+[2025-04-09T06:51:08.507+0000] {RSS_DAG.py:107} INFO - Message with id 304cf85e-2285-4fca-8949-b2b7d4910979.
+[2025-04-09T06:51:08.509+0000] {RSS_DAG.py:112} INFO - Message with id 304cf85e-2285-4fca-8949-b2b7d4910979 already exists. Skipping.
+[2025-04-09T06:51:08.521+0000] {RSS_DAG.py:107} INFO - Message with id ffaeaa7c-3f91-46a7-be49-5f9b58bc89db.
+[2025-04-09T06:51:08.523+0000] {RSS_DAG.py:112} INFO - Message with id ffaeaa7c-3f91-46a7-be49-5f9b58bc89db already exists. Skipping.
+[2025-04-09T06:51:08.540+0000] {RSS_DAG.py:107} INFO - Message with id 89d5f1ef-ad6b-4580-81b7-f6c6c0ca6283.
+[2025-04-09T06:51:08.542+0000] {RSS_DAG.py:112} INFO - Message with id 89d5f1ef-ad6b-4580-81b7-f6c6c0ca6283 already exists. Skipping.
+[2025-04-09T06:51:08.554+0000] {RSS_DAG.py:107} INFO - Message with id be70a774-74e2-4b2c-8a10-f0664a1d114c.
+[2025-04-09T06:51:08.556+0000] {RSS_DAG.py:112} INFO - Message with id be70a774-74e2-4b2c-8a10-f0664a1d114c already exists. Skipping.
+[2025-04-09T06:51:08.569+0000] {RSS_DAG.py:107} INFO - Message with id fea68659-a7cc-4550-8f2f-630a4095c751.
+[2025-04-09T06:51:08.571+0000] {RSS_DAG.py:112} INFO - Message with id fea68659-a7cc-4550-8f2f-630a4095c751 already exists. Skipping.
+[2025-04-09T06:51:08.583+0000] {RSS_DAG.py:107} INFO - Message with id 75910512-0523-4f38-9a67-f38432898a31.
+[2025-04-09T06:51:08.585+0000] {RSS_DAG.py:112} INFO - Message with id 75910512-0523-4f38-9a67-f38432898a31 already exists. Skipping.
+[2025-04-09T06:51:08.597+0000] {RSS_DAG.py:107} INFO - Message with id 5446fd3c-b230-4aa6-be23-d2abb37267bd.
+[2025-04-09T06:51:08.599+0000] {RSS_DAG.py:112} INFO - Message with id 5446fd3c-b230-4aa6-be23-d2abb37267bd already exists. Skipping.
+[2025-04-09T06:51:08.615+0000] {RSS_DAG.py:107} INFO - Message with id 94ba8ba9-277e-469f-80a0-fea49c6dd29d.
+[2025-04-09T06:51:08.617+0000] {RSS_DAG.py:112} INFO - Message with id 94ba8ba9-277e-469f-80a0-fea49c6dd29d already exists. Skipping.
+[2025-04-09T06:51:08.633+0000] {RSS_DAG.py:107} INFO - Message with id 483f62d4-a116-4d74-b887-b26b7aa5424b.
+[2025-04-09T06:51:08.635+0000] {RSS_DAG.py:112} INFO - Message with id 483f62d4-a116-4d74-b887-b26b7aa5424b already exists. Skipping.
+[2025-04-09T06:51:08.650+0000] {RSS_DAG.py:107} INFO - Message with id 480ae80d-e3b8-46f1-9730-af77fbd6093d.
+[2025-04-09T06:51:08.652+0000] {RSS_DAG.py:112} INFO - Message with id 480ae80d-e3b8-46f1-9730-af77fbd6093d already exists. Skipping.
+[2025-04-09T06:51:08.663+0000] {RSS_DAG.py:107} INFO - Message with id e56ec2f8-45af-4afc-a11c-d6c2d65de44f.
+[2025-04-09T06:51:08.666+0000] {RSS_DAG.py:112} INFO - Message with id e56ec2f8-45af-4afc-a11c-d6c2d65de44f already exists. Skipping.
+[2025-04-09T06:51:08.681+0000] {RSS_DAG.py:107} INFO - Message with id 2c57ee34-cb82-4f62-830d-95386be991de.
+[2025-04-09T06:51:08.682+0000] {RSS_DAG.py:112} INFO - Message with id 2c57ee34-cb82-4f62-830d-95386be991de already exists. Skipping.
+[2025-04-09T06:51:08.694+0000] {RSS_DAG.py:107} INFO - Message with id 63e2d0e5-7cb4-4d38-b27c-ee76f7051694.
+[2025-04-09T06:51:08.696+0000] {RSS_DAG.py:112} INFO - Message with id 63e2d0e5-7cb4-4d38-b27c-ee76f7051694 already exists. Skipping.
+[2025-04-09T06:51:08.708+0000] {RSS_DAG.py:107} INFO - Message with id 2bd77a4b-fce9-402e-93c1-e5151a38039f.
+[2025-04-09T06:51:08.710+0000] {RSS_DAG.py:112} INFO - Message with id 2bd77a4b-fce9-402e-93c1-e5151a38039f already exists. Skipping.
+[2025-04-09T06:51:08.723+0000] {RSS_DAG.py:107} INFO - Message with id 7b66d81d-b119-4542-8c07-2cfa442cc00a.
+[2025-04-09T06:51:08.725+0000] {RSS_DAG.py:112} INFO - Message with id 7b66d81d-b119-4542-8c07-2cfa442cc00a already exists. Skipping.
+[2025-04-09T06:51:08.739+0000] {RSS_DAG.py:107} INFO - Message with id 5c40e5a2-a17f-48ed-8963-3214e076722a.
+[2025-04-09T06:51:08.741+0000] {RSS_DAG.py:112} INFO - Message with id 5c40e5a2-a17f-48ed-8963-3214e076722a already exists. Skipping.
+[2025-04-09T06:51:08.752+0000] {RSS_DAG.py:107} INFO - Message with id fd02ee9e-6b95-4a98-b725-ee111289d1d2.
+[2025-04-09T06:51:08.754+0000] {RSS_DAG.py:112} INFO - Message with id fd02ee9e-6b95-4a98-b725-ee111289d1d2 already exists. Skipping.
+[2025-04-09T06:51:08.766+0000] {RSS_DAG.py:107} INFO - Message with id 77e61cee-c30d-4822-a986-bfc2fccc735d.
+[2025-04-09T06:51:08.767+0000] {RSS_DAG.py:112} INFO - Message with id 77e61cee-c30d-4822-a986-bfc2fccc735d already exists. Skipping.
+[2025-04-09T06:51:08.780+0000] {RSS_DAG.py:107} INFO - Message with id fee075dd-2263-45b9-b331-1d0fd64996ae.
+[2025-04-09T06:51:08.781+0000] {RSS_DAG.py:112} INFO - Message with id fee075dd-2263-45b9-b331-1d0fd64996ae already exists. Skipping.
+[2025-04-09T06:51:08.792+0000] {RSS_DAG.py:107} INFO - Message with id e88cd9a6-66ad-4b40-8b4d-230085a32c65.
+[2025-04-09T06:51:08.794+0000] {RSS_DAG.py:112} INFO - Message with id e88cd9a6-66ad-4b40-8b4d-230085a32c65 already exists. Skipping.
+[2025-04-09T06:51:08.809+0000] {RSS_DAG.py:107} INFO - Message with id 76ab933b-9e80-4ee1-b6cb-1d7fd0465b72.
+[2025-04-09T06:51:08.811+0000] {RSS_DAG.py:112} INFO - Message with id 76ab933b-9e80-4ee1-b6cb-1d7fd0465b72 already exists. Skipping.
+[2025-04-09T06:51:08.825+0000] {RSS_DAG.py:107} INFO - Message with id f4743c6c-b9c8-41bf-80ab-eed41c7da496.
+[2025-04-09T06:51:08.827+0000] {RSS_DAG.py:112} INFO - Message with id f4743c6c-b9c8-41bf-80ab-eed41c7da496 already exists. Skipping.
+[2025-04-09T06:51:08.841+0000] {RSS_DAG.py:107} INFO - Message with id 0c544354-8019-4b37-8f57-ccc7d902d33d.
+[2025-04-09T06:51:08.843+0000] {RSS_DAG.py:112} INFO - Message with id 0c544354-8019-4b37-8f57-ccc7d902d33d already exists. Skipping.
+[2025-04-09T06:51:08.856+0000] {RSS_DAG.py:107} INFO - Message with id f9ec94be-d4cb-4b5e-b4b1-d8c713318870.
+[2025-04-09T06:51:08.858+0000] {RSS_DAG.py:112} INFO - Message with id f9ec94be-d4cb-4b5e-b4b1-d8c713318870 already exists. Skipping.
+[2025-04-09T06:51:08.870+0000] {RSS_DAG.py:107} INFO - Message with id b873e8dd-df22-4424-8288-5ee3594c0a54.
+[2025-04-09T06:51:08.872+0000] {RSS_DAG.py:112} INFO - Message with id b873e8dd-df22-4424-8288-5ee3594c0a54 already exists. Skipping.
+[2025-04-09T06:51:08.873+0000] {RSS_DAG.py:126} INFO - All expected messages processed or counter reached zero.
+[2025-04-09T06:51:08.873+0000] {RSS_DAG.py:148} INFO - No new messages to insert.
+[2025-04-09T06:51:08.875+0000] {RSS_DAG.py:151} INFO - Attempting to stop RabbitMQ consumer...
+[2025-04-09T06:51:08.877+0000] {RSS_DAG.py:153} INFO - Stopped consuming RabbitMQ messages.
+[2025-04-09T06:51:08.877+0000] {RSS_DAG.py:193} INFO - RabbitMQ consumption completed.
+[2025-04-09T06:51:08.878+0000] {blocking_connection.py:802} INFO - Closing connection (200): Normal shutdown
+[2025-04-09T06:51:08.878+0000] {channel.py:536} INFO - Closing channel (200): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-09T06:51:08.880+0000] {channel.py:1133} INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f737eb1f3e0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-09T06:51:08.880+0000] {connection.py:1316} INFO - Closing connection (200): 'Normal shutdown'
+[2025-04-09T06:51:08.881+0000] {io_services_utils.py:731} INFO - Aborting transport connection: state=1; <socket.socket fd=84, family=2, type=1, proto=6, laddr=('172.28.0.16', 41810), raddr=('172.28.0.12', 5672)>
+[2025-04-09T06:51:08.881+0000] {io_services_utils.py:904} INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=84, family=2, type=1, proto=6, laddr=('172.28.0.16', 41810), raddr=('172.28.0.12', 5672)>
+[2025-04-09T06:51:08.882+0000] {io_services_utils.py:869} INFO - Deactivating transport: state=1; <socket.socket fd=84, family=2, type=1, proto=6, laddr=('172.28.0.16', 41810), raddr=('172.28.0.12', 5672)>
+[2025-04-09T06:51:08.882+0000] {connection.py:2017} INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+[2025-04-09T06:51:08.883+0000] {connection.py:2086} INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+[2025-04-09T06:51:08.883+0000] {io_services_utils.py:882} INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=84, family=2, type=1, proto=6, laddr=('172.28.0.16', 41810), raddr=('172.28.0.12', 5672)>
+[2025-04-09T06:51:08.884+0000] {blocking_connection.py:525} INFO - User-initiated close: result=(<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, ConnectionClosedByClient: (200) 'Normal shutdown')
+[2025-04-09T06:51:08.893+0000] {python.py:237} INFO - Done. Returned value was: None
+[2025-04-09T06:51:08.896+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-04-09T06:51:08.904+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=RSS, task_id=process_news, run_id=manual__2025-04-09T06:50:56.361995+00:00, execution_date=20250409T065056, start_date=20250409T065107, end_date=20250409T065108
+[2025-04-09T06:51:08.959+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-04-09T06:51:08.972+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-04-09T06:51:08.976+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

@@ -1,0 +1,27 @@
+{
+  "name": "clickhouse-sink",
+  "config": {
+      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "tasks.max": "1",
+      "topics": "ethereum",
+      "connection.url": "jdbc:clickhouse://clickhouse:8123/blockchain_db",
+      "connection.user": "default",
+      "connection.password": "",
+      "auto.create": "false",
+      "insert.mode": "upsert",
+      "pk.mode": "record_key",
+      "pk.fields": "hash",
+      "delete.enabled": "true",
+      "auto.evolve": "true",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "true",
+      "table.name.format": "etherium_transactions",
+      "errors.tolerance": "all",
+      "errors.log.enable": "true",          
+      "errors.log.include.messages": "true",
+      "errors.deadletterqueue.topic.name": "ethereum-dlq",  
+      "errors.deadletterqueue.context.headers.enable": "true" 
+  }
+}

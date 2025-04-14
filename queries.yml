@@ -1,0 +1,7 @@
+pg_postmaster:
+  query: "SELECT pg_postmaster_start_time() AS start_time;"
+  metrics:
+    - start_time:
+        usage: "GAUGE"
+        description: "Unix timestamp of PostgreSQL server start time"
+        

@@ -24,6 +24,12 @@ fi
 # Регистрация Sink коннекторов
 echo "Configuring PostgreSQL sink connector..."
 curl -X POST -H "Content-Type: application/json" --data @/etc/kafka-connect/connectors/postgres-sink.json http://localhost:8083/connectors
+
+echo ""
+
+echo "Configuring ClickHouse sink connector..."
+#curl -X POST -H "Content-Type: application/json" --data @/etc/kafka-connect/connectors/clickhouse-sink.json http://localhost:8083/connectors
+
 echo ""
 
 echo "Kafka Connect connectors configured."

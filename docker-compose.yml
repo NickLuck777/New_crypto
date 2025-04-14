@@ -1,12 +1,12 @@
 x-airflow-common:
   &airflow-common
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.9.2}
+  image: ${AIRFLOW_IMAGE_NAME:-airflow-custom:latest}
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6380/0
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
@@ -20,6 +20,8 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
+  networks:
+    - crypto_network
   depends_on:
     &airflow-common-depends-on
     redis:
@@ -41,6 +43,8 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
+    networks:
+      - crypto_network
     restart: always
 
   postgres_prod:
@@ -50,6 +54,8 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: test
+    networks:
+      - crypto_network
     ports:
       - "5432:5432"
     volumes:
@@ -59,6 +65,8 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse_crypto
+    networks:
+      - crypto_network
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -69,25 +77,12 @@ services:
       - CLICKHOUSE_PASSWORD=
       - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana_crypto
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - clickhouse
-    networks:
-      - default
-
   redis:
     image: redis:7.2-bookworm
-    expose:
-      - 6380
+    networks:
+      - crypto_network
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -99,6 +94,8 @@ services:
   airflow-webserver:
     <<: *airflow-common
     command: webserver
+    networks:
+      - crypto_network
     ports:
       - "8080:8080"
     healthcheck:
@@ -112,6 +109,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    volumes:
+      - ./Get_msg.session:/opt/airflow/dags/Get_msg.session
 
   airflow-scheduler:
     <<: *airflow-common
@@ -123,10 +122,14 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    networks:
+      - crypto_network
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    volumes:
+      - ./Get_msg.session:/opt/airflow/dags/Get_msg.session
 
   airflow-worker:
     <<: *airflow-common
@@ -143,10 +146,14 @@ services:
       <<: *airflow-common-env
       DUMB_INIT_SETSID: "0"
     restart: always
+    networks:
+      - crypto_network
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    volumes:
+      - ./Get_msg.session:/opt/airflow/dags/Get_msg.session
 
   airflow-triggerer:
     <<: *airflow-common
@@ -158,6 +165,8 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    networks:
+      - crypto_network
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -221,6 +230,8 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
+    networks:
+      - crypto_network
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
@@ -232,6 +243,8 @@ services:
     environment:
       <<: *airflow-common-env
       CONNECTION_CHECK_MAX_COUNT: "0"
+    networks:
+      - crypto_network
     command:
       - bash
       - -c
@@ -251,6 +264,8 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    networks:
+      - crypto_network
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -262,7 +277,7 @@ services:
       - "9092:9092"
       - "9093:9093"
     networks:
-      default:
+      crypto_network:
         ipv4_address: 172.28.0.10
     environment:
       - KAFKA_CFG_NODE_ID=0
@@ -283,8 +298,11 @@ services:
 
   kafka-connect:
     image: kafka-connect-custom:latest
+    networks:
+      - crypto_network
     ports:
       - "8083:8083"
+      - "9999:9999"  # Порт для JMX Exporter
     depends_on:
       - kafka
       - postgres_prod
@@ -310,9 +328,13 @@ services:
       CONNECT_CONFIG_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
       CONNECT_OFFSET_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
       CONNECT_STATUS_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
+      # Добавляем JMX Exporter как Java Agent
+      KAFKA_OPTS: "-javaagent:/usr/share/jmx_prometheus_javaagent.jar=9999:/etc/kafka/jmx_config.yml"
     volumes:
       - ./KAFKA-CONNECT/connectors:/connectors
       - ./KAFKA-CONNECT/plugins:/plugins
+      - ./jmx_prometheus_javaagent.jar:/usr/share/jmx_prometheus_javaagent.jar  # Путь к агенту
+      - ./jmx_config.yml:/etc/kafka/jmx_config.yml  # Путь к конфигу JMX
     command:
       - /bin/bash
       - -c
@@ -323,19 +345,19 @@ services:
     container_name: redis_crypto
     restart: always
     networks:
-      - default
+      - crypto_network
     ports:
-      - "6379:6379"
+      - "6378:6378"
     volumes:
       - redis_data:/data
-    command: [ "redis-server", "--appendonly", "yes" ]
+    command: [ "redis-server", "--port", "6378", "--appendonly", "yes" ]
 
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
     networks:
-      - default
+      - crypto_network
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -345,7 +367,7 @@ services:
     image: mongo-express:latest
     restart: always
     networks:
-      - default
+      - crypto_network
     ports:
       - "8081:8081"
     environment:
@@ -364,10 +386,71 @@ services:
       RABBITMQ_PASSWORD: nick
       RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS: true
     networks:
-      - default
+      - crypto_network
+
+  # Новый сервис: Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_crypto
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    depends_on:
+      - kafka-exporter
+      - kafka-connect
+      - postgres-exporter
+    networks:
+      - crypto_network
+
+  # Новый сервис: Kafka Exporter
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka_exporter_crypto
+    restart: on-failure
+    ports:
+      - "9308:9308"
+    environment:
+      - KAFKA_BROKER=kafka:9092  # Указываем имя сервиса Kafka
+    networks:
+      - crypto_network
+
+  # Новый сервис: PostgreSQL Exporter
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_crypto
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://user:password@rc1d-t1lz637ht7v0adzm.mdb.yandexcloud.net:6432/blockchain_pg?sslmode=require
+      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/queries.yml
+    volumes:
+      - ./queries.yml:/etc/queries.yml
+    networks:
+      - crypto_network
+
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_crypto
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - clickhouse
+      - prometheus
+    networks:
+      - crypto_network
 
 networks:
-  default:
+  crypto_network:
     driver: bridge
     ipam:
       config:
@@ -381,3 +464,4 @@ volumes:
   grafana-data:
   redis_data:
   kafka_data:
+  prometheus_data:

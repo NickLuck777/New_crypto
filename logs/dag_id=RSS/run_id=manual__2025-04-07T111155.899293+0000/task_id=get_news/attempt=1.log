@@ -1,0 +1,78 @@
+[2025-04-07T11:12:01.342+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-04-07T11:12:01.358+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: RSS.get_news manual__2025-04-07T11:11:55.899293+00:00 [queued]>
+[2025-04-07T11:12:01.364+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: RSS.get_news manual__2025-04-07T11:11:55.899293+00:00 [queued]>
+[2025-04-07T11:12:01.365+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2025-04-07T11:12:01.377+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): get_news> on 2025-04-07 11:11:55.899293+00:00
+[2025-04-07T11:12:01.389+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=144) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-04-07T11:12:01.390+0000] {standard_task_runner.py:63} INFO - Started process 145 to run task
+[2025-04-07T11:12:01.390+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'RSS', 'get_news', 'manual__2025-04-07T11:11:55.899293+00:00', '--job-id', '141', '--raw', '--subdir', 'DAGS_FOLDER/RSS_DAG - Copy.py', '--cfg-path', '/tmp/tmpxlk6rm5i']
+[2025-04-07T11:12:01.392+0000] {standard_task_runner.py:91} INFO - Job 141: Subtask get_news
+[2025-04-07T11:12:01.428+0000] {task_command.py:426} INFO - Running <TaskInstance: RSS.get_news manual__2025-04-07T11:11:55.899293+00:00 [running]> on host 90dd176e8968
+[2025-04-07T11:12:01.495+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='user' AIRFLOW_CTX_DAG_ID='RSS' AIRFLOW_CTX_TASK_ID='get_news' AIRFLOW_CTX_EXECUTION_DATE='2025-04-07T11:11:55.899293+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-04-07T11:11:55.899293+00:00'
+[2025-04-07T11:12:01.496+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-04-07T11:12:01.506+0000] {connection_workflow.py:179} INFO - Pika version 1.3.2 connecting to ('172.28.0.6', 5672)
+[2025-04-07T11:12:01.507+0000] {io_services_utils.py:345} INFO - Socket connected: <socket.socket fd=93, family=2, type=1, proto=6, laddr=('172.28.0.17', 56112), raddr=('172.28.0.6', 5672)>
+[2025-04-07T11:12:01.508+0000] {connection_workflow.py:428} INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+[2025-04-07T11:12:01.512+0000] {connection_workflow.py:293} INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T11:12:01.512+0000] {connection_workflow.py:725} INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T11:12:01.513+0000] {blocking_connection.py:453} INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T11:12:01.513+0000] {blocking_connection.py:1264} INFO - Created channel=1
+[2025-04-07T11:12:02.313+0000] {base.py:84} INFO - Using connection ID 'redis_conn' for task execution.
+[2025-04-07T11:12:02.314+0000] {channel.py:536} INFO - Closing channel (0): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T11:12:02.316+0000] {channel.py:1133} INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f6ee0c95f40> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T11:12:02.316+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-04-07T11:12:02.317+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 276, in connect
+    sock = self.retry.call_with_retry(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/retry.py", line 46, in call_with_retry
+    return do()
+           ^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 277, in <lambda>
+    lambda: self._connect(), lambda error: self.disconnect(error)
+            ^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 639, in _connect
+    raise err
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 627, in _connect
+    sock.connect(socket_address)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 465, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/RSS_DAG - Copy.py", line 39, in get_news
+    RedisHook(redis_conn_id='redis_conn').get_conn().set('message_count', message_count)
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/commands/core.py", line 2342, in set
+    return self.execute_command("SET", *pieces, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/client.py", line 542, in execute_command
+    conn = self.connection or pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 1109, in get_connection
+    connection.connect()
+  File "/home/airflow/.local/lib/python3.12/site-packages/redis/connection.py", line 282, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to redis_user:6378. Connection refused.
+[2025-04-07T11:12:02.328+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=RSS, task_id=get_news, run_id=manual__2025-04-07T11:11:55.899293+00:00, execution_date=20250407T111155, start_date=20250407T111201, end_date=20250407T111202
+[2025-04-07T11:12:02.345+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 141 for task get_news (Error 111 connecting to redis_user:6378. Connection refused.; 145)
+[2025-04-07T11:12:02.366+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2025-04-07T11:12:02.385+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-04-07T11:12:02.391+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

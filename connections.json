@@ -30,7 +30,7 @@
     "extra": "{}"
   },
   "mongo_conn": {
-    "conn_type": "MongoDB",
+    "conn_type": "mongo",
     "description": "Подключение к mongo",
     "login": "root",
     "password": "123",
@@ -43,7 +43,7 @@
     "conn_type": "redis",
     "description": "Подключение к redis",
     "host": "redis_user",
-    "port": 6379,
+    "port": 6378,
     "schema": "",
     "extra": "{}"
   }

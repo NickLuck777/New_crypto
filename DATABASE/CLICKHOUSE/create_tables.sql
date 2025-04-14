@@ -1,87 +1,98 @@
--- Table for reading data from Kafka
-CREATE TABLE kafka_etherium (
-    type UInt64 COMMENT 'Ethereum transaction type',
-    chainId String COMMENT 'Network chain ID',
-    nonce String COMMENT 'Transaction nonce',
-    gas Int COMMENT 'Gas limit',
-    maxFeePerGas Int COMMENT 'Maximum fee per gas',
-    maxPriorityFeePerGas Int COMMENT 'Maximum priority fee per gas',
-    "to" String COMMENT 'Recipient address',
-    value Int COMMENT 'Transfer amount (in wei)',
-    accessList String COMMENT 'Access list (for EIP-2930)',
-    input String COMMENT 'Transaction data (for contract calls)',
-    r String COMMENT 'ECDSA signature component',
-    s String COMMENT 'ECDSA signature component',
-    yParity Int COMMENT 'Y parity (for public key recovery)',
-    v Int COMMENT 'ECDSA signature recovery parameter',
-    hash String COMMENT 'Transaction hash',
-    blockHash String COMMENT 'Hash of the block containing the transaction',
-    blockNumber Int COMMENT 'Block number',
-    transactionIndex Int COMMENT 'Transaction index within the block',
-    "from" String COMMENT 'Sender address',
-    gasPrice Int COMMENT 'Gas price (for legacy transactions)'
-)
-ENGINE = Kafka()
-COMMENT 'Table for continuously reading raw Ethereum transaction data from the Kafka topic'
+CREATE TABLE IF NOT EXISTS kafka_etherium (
+    type Int32,
+    "chainId" Nullable(Int64),
+    nonce Nullable(Int64),
+    gas Nullable(Int64),
+    "maxFeePerGas" Nullable(Int64),
+    "maxPriorityFeePerGas" Nullable(Int64),
+    "to" Nullable(String),
+    value Nullable(Int64),
+    input Nullable(String),
+    r Nullable(String),
+    s Nullable(String),
+    "yParity" Nullable(Int32),
+    v Nullable(Int32),
+    hash Nullable(String),
+    "blockHash" Nullable(String),
+    "blockNumber" Nullable(Int64),
+    "transactionIndex" Nullable(Int64),
+    "from" Nullable(String),
+    "gasPrice" Nullable(Int64),
+    "blobVersionedHashes" Array(String),
+    "maxFeePerBlobGas" Nullable(Int64)
+) ENGINE = Kafka()
 SETTINGS kafka_broker_list = '172.28.0.10:9092',
-         kafka_topic_list = 'ethereum',
-         kafka_group_name = 'group1',
-         kafka_format = 'JSONEachRow';
+         kafka_topic_list = 'ethereum_clickhouse',
+         kafka_group_name = 'ethereum_trx',
+         kafka_format = 'JSONEachRow', -- Исправляем формат
+         kafka_skip_broken_messages = 1; -- Пропускаем битые сообщения
 
--- Table for final information storage
-CREATE TABLE etherium_transactions (
-    timestamp DateTime COMMENT 'Time when the record was added to the ClickHouse table',
-    type UInt64 COMMENT 'Ethereum transaction type',
-    chainId String COMMENT 'Network chain ID',
-    nonce String COMMENT 'Transaction nonce',
-    gas Int COMMENT 'Gas limit',
-    maxFeePerGas Int COMMENT 'Maximum fee per gas',
-    maxPriorityFeePerGas Int COMMENT 'Maximum priority fee per gas',
-    "to" String COMMENT 'Recipient address',
-    value Int COMMENT 'Transfer amount (in wei)',
-    accessList String COMMENT 'Access list (for EIP-2930)',
-    input String COMMENT 'Transaction data (for contract calls)',
-    r String COMMENT 'ECDSA signature component',
-    s String COMMENT 'ECDSA signature component',
-    yParity Int COMMENT 'Y parity (for public key recovery)',
-    v Int COMMENT 'ECDSA signature recovery parameter',
-    hash String COMMENT 'Transaction hash',
-    blockHash String COMMENT 'Hash of the block containing the transaction',
-    blockNumber Int COMMENT 'Block number',
-    transactionIndex Int COMMENT 'Transaction index within the block',
-    "from" String COMMENT 'Sender address',
-    gasPrice Int COMMENT 'Gas price (for legacy transactions)'
-)
-ENGINE = MergeTree()
-COMMENT 'Final table for storing processed Ethereum transactions'
-ORDER BY (timestamp)
+
+-- Создаём таблицу MergeTree
+CREATE TABLE IF NOT EXISTS etherium_transactions (
+    insertion_date DateTime DEFAULT now(),
+    type Int32,
+    "chainId" Nullable(Int64),
+    nonce Nullable(Int64),
+    gas Nullable(Int64),
+    "maxFeePerGas" Nullable(Int64),
+    "maxPriorityFeePerGas" Nullable(Int64),
+    "to" Nullable(String),
+    value Nullable(Int64),
+    input Nullable(String),
+    r Nullable(String),
+    s Nullable(String),
+    "yParity" Nullable(Int32),
+    v Nullable(Int32),
+    hash Nullable(String),
+    "blockHash" Nullable(String),
+    "blockNumber" Nullable(Int64),
+    "transactionIndex" Nullable(Int64),
+    "from" Nullable(String),
+    "gasPrice" Nullable(Int64),
+    "blobVersionedHashes" Array(String),
+    "maxFeePerBlobGas" Nullable(Int64)
+) ENGINE = MergeTree()
+ORDER BY (insertion_date)
 SETTINGS index_granularity = 8192;
 
--- Materialized View
--- This view automatically reads data from the kafka_etherium table,
--- adds the current timestamp (from the ClickHouse server), and inserts it
--- into the etherium_transactions table.
-CREATE MATERIALIZED VIEW ethereum_consumer TO etherium_transactions 
-AS 
-SELECT  now() as timestamp, -- Use now() to get DateTime
+-- Создаём материализованное представление
+CREATE MATERIALIZED VIEW IF NOT EXISTS ethereum_consumer
+TO etherium_transactions
+AS
+SELECT
+    now() AS insertion_date,
     type,
-    chainId,
+    "chainId",
     nonce,
     gas,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
+    "maxFeePerGas",
+    "maxPriorityFeePerGas",
     "to",
     value,
-    accessList,
     input,
     r,
     s,
-    yParity,
+    "yParity",
     v,
     hash,
-    blockHash,
-    blockNumber,
-    transactionIndex,
+    "blockHash",
+    "blockNumber",
+    "transactionIndex",
     "from",
-    gasPrice
+    "gasPrice",
+    "blobVersionedHashes",
+    "maxFeePerBlobGas"
 FROM kafka_etherium;
+
+
+
+drop table kafka_etherium;
+drop table etherium_transactions;
+drop table ethereum_consumer;
+
+select * from ethereum_consumer;
+select * from etherium_transactions;
+select * from ethereum_consumer;
+
+truncate table etherium_transactions;

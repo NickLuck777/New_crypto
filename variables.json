@@ -1,15 +1,13 @@
 {
-	"variables": {
-		"tg_api_id": 27948937,
-		"tg_api_hash": "c080ddb27bcafabd88c52b78f7c6a0e1",
-		"tg_phone_number": "+66614051808",
-		"tg_channels": "['@Pro_Blockchain', '@forklog', '@invcryptonews']",
-		"tg_posts_limit": 100,
-		"rss_channels": "['https://cointelegraph.com/rss', 'https://www.coindesk.com/arc/outboundfeeds/rss/']",
-		"rmq_rss_queue": "RSS",
-		"rmq_tg_queue": "TELEGRAM",
-		"mongo_rss_collection": "RSS",
-		"mongo_tg_collection": "TELEGRAM",
-		"mongo_db": "DB"
-	}
+	"tg_api_id": 27948937,
+	"tg_api_hash": "c080ddb27bcafabd88c52b78f7c6a0e1",
+	"tg_phone_number": "+66614051808",
+	"tg_channels": ["@Pro_Blockchain", "@forklog", "@invcryptonews"],
+	"tg_posts_limit": 100,
+	"rss_channels": ["https://cointelegraph.com/rss", "https://www.coindesk.com/arc/outboundfeeds/rss/"],
+	"rmq_rss_queue": "RSS",
+	"rmq_tg_queue": "TELEGRAM",
+	"mongo_rss_collection": "RSS",
+	"mongo_tg_collection": "TELEGRAM",
+	"mongo_db": "DB"
 }

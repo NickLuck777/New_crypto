@@ -1,0 +1,198 @@
+[2025-04-07T12:32:15.336+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2025-04-07T12:32:15.357+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: RSS.process_news scheduled__2025-04-07T11:01:00+00:00 [queued]>
+[2025-04-07T12:32:15.365+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: RSS.process_news scheduled__2025-04-07T11:01:00+00:00 [queued]>
+[2025-04-07T12:32:15.366+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2025-04-07T12:32:15.379+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): process_news> on 2025-04-07 11:01:00+00:00
+[2025-04-07T12:32:15.396+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61: DeprecationWarning: This process (pid=78) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-04-07T12:32:15.399+0000] {standard_task_runner.py:63} INFO - Started process 79 to run task
+[2025-04-07T12:32:15.399+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'RSS', 'process_news', 'scheduled__2025-04-07T11:01:00+00:00', '--job-id', '152', '--raw', '--subdir', 'DAGS_FOLDER/RSS_DAG.py', '--cfg-path', '/tmp/tmpelto3vbv']
+[2025-04-07T12:32:15.402+0000] {standard_task_runner.py:91} INFO - Job 152: Subtask process_news
+[2025-04-07T12:32:15.444+0000] {task_command.py:426} INFO - Running <TaskInstance: RSS.process_news scheduled__2025-04-07T11:01:00+00:00 [running]> on host 1f03420fad18
+[2025-04-07T12:32:15.515+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='user' AIRFLOW_CTX_DAG_ID='RSS' AIRFLOW_CTX_TASK_ID='process_news' AIRFLOW_CTX_EXECUTION_DATE='2025-04-07T11:01:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2025-04-07T11:01:00+00:00'
+[2025-04-07T12:32:15.516+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2025-04-07T12:32:15.532+0000] {base.py:84} INFO - Using connection ID 'mongo_conn' for task execution.
+[2025-04-07T12:32:15.534+0000] {RSS_DAG.py:159} INFO - Инициализация модели анализа тональности...
+[2025-04-07T12:32:15.535+0000] {log.py:232} WARNING - No model was supplied, defaulted to distilbert/distilbert-base-uncased-finetuned-sst-2-english and revision 714eb0f (https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english).
+Using a pipeline without specifying a model name and revision in production is not recommended.
+[2025-04-07T12:32:18.615+0000] {log.py:232} WARNING - Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+[2025-04-07T12:32:18.615+0000] {file_download.py:1670} WARNING - Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+[2025-04-07T12:35:44.341+0000] {log.py:232} WARNING - Device set to use cpu
+[2025-04-07T12:35:44.343+0000] {RSS_DAG.py:161} INFO - Модель анализа тональности загружена.
+[2025-04-07T12:35:44.350+0000] {base.py:84} INFO - Using connection ID 'redis_conn' for task execution.
+[2025-04-07T12:35:44.361+0000] {RSS_DAG.py:174} INFO - Ожидается 56 сообщений на основе счетчика Redis.
+[2025-04-07T12:35:44.444+0000] {RSS_DAG.py:180} INFO - Подключено к коллекции MongoDB: DB.RSS
+[2025-04-07T12:35:44.448+0000] {connection_workflow.py:179} INFO - Pika version 1.3.2 connecting to ('172.28.0.11', 5672)
+[2025-04-07T12:35:44.449+0000] {io_services_utils.py:345} INFO - Socket connected: <socket.socket fd=99, family=2, type=1, proto=6, laddr=('172.28.0.18', 36410), raddr=('172.28.0.11', 5672)>
+[2025-04-07T12:35:44.451+0000] {connection_workflow.py:428} INFO - Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+[2025-04-07T12:35:44.462+0000] {connection_workflow.py:293} INFO - AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T12:35:44.463+0000] {connection_workflow.py:725} INFO - AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T12:35:44.463+0000] {blocking_connection.py:453} INFO - Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+[2025-04-07T12:35:44.464+0000] {blocking_connection.py:1264} INFO - Created channel=1
+[2025-04-07T12:35:44.476+0000] {RSS_DAG.py:191} INFO - Запуск потребителя RabbitMQ в очереди 'RSS'. Ожидание 56 сообщений...
+[2025-04-07T12:35:44.477+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.478+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.478+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.478+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.479+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.479+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.480+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.480+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.481+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.481+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.482+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.482+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.483+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.483+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.484+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.485+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.485+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.486+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.486+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.487+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.487+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.487+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.488+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.488+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.489+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.489+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.489+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.490+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.490+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.491+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.491+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.491+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.492+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.492+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.492+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.492+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.493+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.493+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.493+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.494+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.494+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.494+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.495+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.495+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.495+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.496+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.496+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.496+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.497+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.497+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.497+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.498+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.498+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.498+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.500+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.500+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.501+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.501+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.502+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.502+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.502+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.503+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.504+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.505+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.505+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.506+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.508+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.508+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.509+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.509+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.510+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.511+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.512+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.512+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.513+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.513+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.514+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.514+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.515+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.515+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.516+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.516+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.516+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.517+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.518+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.518+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.519+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.519+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.520+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.520+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.521+0000] {RSS_DAG.py:99} WARNING - Не найдено содержимое для анализа тональности в сообщении N/A
+[2025-04-07T12:35:44.521+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.521+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.652+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.653+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.666+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.667+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.687+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.688+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.711+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.712+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.731+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.731+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.749+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.749+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.765+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.766+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.782+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.783+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.804+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.805+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.829+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.830+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.852+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.852+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.871+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.872+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.889+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.890+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.909+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.910+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.928+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.928+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.950+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.951+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.972+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.973+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:44.994+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:44.995+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.021+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.022+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.046+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.047+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.067+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.068+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.089+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.090+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.111+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.112+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.137+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.138+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.158+0000] {RSS_DAG.py:107} INFO - Сообщение с guid None.
+[2025-04-07T12:35:45.159+0000] {RSS_DAG.py:114} WARNING - Получено сообщение без GUID. Пропускаем проверку дубликатов и добавляем.
+[2025-04-07T12:35:45.159+0000] {RSS_DAG.py:126} INFO - Обработаны все ожидаемые сообщения или счетчик достиг нуля.
+[2025-04-07T12:35:45.160+0000] {RSS_DAG.py:129} INFO - Вставка 56 новых сообщений в MongoDB.
+[2025-04-07T12:35:45.232+0000] {RSS_DAG.py:151} INFO - Попытка остановить потребителя RabbitMQ...
+[2025-04-07T12:35:45.234+0000] {RSS_DAG.py:153} INFO - Остановлено потребление сообщений RabbitMQ.
+[2025-04-07T12:35:45.234+0000] {RSS_DAG.py:193} INFO - Потребление RabbitMQ завершено.
+[2025-04-07T12:35:45.235+0000] {blocking_connection.py:802} INFO - Closing connection (200): Normal shutdown
+[2025-04-07T12:35:45.235+0000] {channel.py:536} INFO - Closing channel (200): 'Normal shutdown' on <Channel number=1 OPEN conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T12:35:45.237+0000] {channel.py:1133} INFO - Received <Channel.CloseOk> on <Channel number=1 CLOSING conn=<SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f66848919d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>>
+[2025-04-07T12:35:45.238+0000] {connection.py:1316} INFO - Closing connection (200): 'Normal shutdown'
+[2025-04-07T12:35:45.239+0000] {io_services_utils.py:731} INFO - Aborting transport connection: state=1; <socket.socket fd=99, family=2, type=1, proto=6, laddr=('172.28.0.18', 36410), raddr=('172.28.0.11', 5672)>
+[2025-04-07T12:35:45.239+0000] {io_services_utils.py:904} INFO - _AsyncTransportBase._initate_abort(): Initiating abrupt asynchronous transport shutdown: state=1; error=None; <socket.socket fd=99, family=2, type=1, proto=6, laddr=('172.28.0.18', 36410), raddr=('172.28.0.11', 5672)>
+[2025-04-07T12:35:45.240+0000] {io_services_utils.py:869} INFO - Deactivating transport: state=1; <socket.socket fd=99, family=2, type=1, proto=6, laddr=('172.28.0.18', 36410), raddr=('172.28.0.11', 5672)>
+[2025-04-07T12:35:45.241+0000] {connection.py:2017} INFO - AMQP stack terminated, failed to connect, or aborted: opened=True, error-arg=None; pending-error=ConnectionClosedByClient: (200) 'Normal shutdown'
+[2025-04-07T12:35:45.241+0000] {connection.py:2086} INFO - Stack terminated due to ConnectionClosedByClient: (200) 'Normal shutdown'
+[2025-04-07T12:35:45.242+0000] {io_services_utils.py:882} INFO - Closing transport socket and unlinking: state=3; <socket.socket fd=99, family=2, type=1, proto=6, laddr=('172.28.0.18', 36410), raddr=('172.28.0.11', 5672)>
+[2025-04-07T12:35:45.243+0000] {blocking_connection.py:525} INFO - User-initiated close: result=(<SelectConnection CLOSED transport=None params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>, ConnectionClosedByClient: (200) 'Normal shutdown')
+[2025-04-07T12:35:45.257+0000] {python.py:237} INFO - Done. Returned value was: None
+[2025-04-07T12:35:45.258+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2025-04-07T12:35:45.269+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=RSS, task_id=process_news, run_id=scheduled__2025-04-07T11:01:00+00:00, execution_date=20250407T110100, start_date=20250407T***215, end_date=20250407T***545
+[2025-04-07T12:35:45.345+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2025-04-07T12:35:45.363+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-04-07T12:35:45.367+0000] {local_task_job_runner.py:222} INFO - ::endgroup::
