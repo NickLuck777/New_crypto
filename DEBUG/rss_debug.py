@@ -6,6 +6,7 @@ from datetime import datetime
 import pendulum
 from transformers import pipeline
 import pymongo
+from transform_md import transform_rss
 
 # Configuration - replace with direct values for debugging
 # You can modify these values as needed for your debugging
@@ -42,16 +43,27 @@ def get_news():
             for feed_url in rss_feeds:
                 try:
                     print(f"Parsing RSS feed: {feed_url}")
-                    feed = feedparser.parse(feed_url)
-                    for entry in feed.entries:
-                        try:
-                            channel.basic_publish(exchange='', routing_key=queue_name, body=json.dumps(entry))
-                            #print(f"Published message from {feed_url}: {json.dumps(entry)}")
-                            message_count += 1
-                        except pika.exceptions.AMQPError as e:
-                            print(f"Error publishing message from {feed_url}: {e}")
-                        except Exception as e:
-                            print(f"Error processing entry from {feed_url}: {entry.get('id', 'N/A')} - {e}")
+                    feed = feedparser.parse("http://feeds.bbci.co.uk/news/world/rss.xml")
+                    print(transform_rss(feed.entries))
+                    # msg = feed.entries[0]
+                    # print(msg)
+                    # new_msg = {}
+                    # new_msg['title'] = msg['title']
+                    # new_msg['id'] = msg['id']
+                    # new_msg['published'] = msg['published']
+                    # print(new_msg)
+                    # break
+                    # for entry in feed.entries:
+                    #     try:
+                    #         channel.basic_publish(exchange='', routing_key=queue_name, body=json.dumps(entry))
+                    #         #print(f"Published message from {feed_url}: {json.dumps(entry)}")
+                    #         message_count += 1
+                    #     except pika.exceptions.AMQPError as e:
+                    #         print(f"Error publishing message from {feed_url}: {e}")
+                    #     except Exception as e:
+                    #         print(f"Error processing entry from {feed_url}: {entry.get('id', 'N/A')} - {e}")
+                    print(feed.entries)
+                    break
                 except feedparser.FeedParserError as e:
                     print(f"Error parsing feed {feed_url}: {e}")
                 except Exception as e:
@@ -185,13 +197,13 @@ def main():
     print("Starting RSS debug script...")
     try:
         # Get news from RSS feeds
-        msg_count = get_news()
+        get_news()
         
-        # Process news if any were found
-        if msg_count > 0:
-            process_news(msg_count)
-        else:
-            print("No messages to process.")
+        # # Process news if any were found
+        # if msg_count > 0:
+        #     process_news(msg_count)
+        # else:
+        #     print("No messages to process.")
             
         print("RSS debug script completed successfully.")
     except Exception as e:

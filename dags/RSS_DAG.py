@@ -8,17 +8,19 @@ from airflow.providers.redis.hooks.redis import RedisHook
 from airflow.hooks.base import BaseHook
 from airflow.models import Variable
 
+from pika.credentials import PlainCredentials
+from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+from datetime import datetime
+
 import feedparser
 import pika
-from pika.credentials import PlainCredentials
 import json
-from datetime import datetime
 import pendulum
-from transformers import pipeline
-from transformers.models.bert import BertModel
 import logging
 import pymongo
+import clickhouse_connect
 import pandas as pd
+import inflection
 
 
 rmq_con = BaseHook.get_connection('rabbitmq_conn')
@@ -28,6 +30,96 @@ collection_name = Variable.get('mongo_rss_collection')
 rss_feeds = json.loads(Variable.get('rss_channels'))
 mongo_db = Variable.get('mongo_db')
 
+def transform_rss(msgs):
+    logging.info(f'Transforming messages...')
+    logging.info(f'Message count: {len(msgs)}')
+    try:
+        df = pd.DataFrame(msgs)
+    except Exception as e:
+        logging.error(f"Failed to create DataFrame from messages: {e}")
+        return None
+
+    logging.info('Deleting columns...')
+    try:
+        df = df[['id', 'title', 'published', 'sentiment']]
+    except KeyError as e:
+        logging.error(f"Missing expected columns: {e}")
+    logging.info('Deleting columns... done.')
+
+    logging.info('Cast published to DateTime...')
+    try:
+        # Приводим первые буквы дня недели и месяца к заглавным для соответствия формату
+        df['published'] = df['published'].apply(
+            lambda date_string: datetime.strptime(
+            ' '.join(word.capitalize() if i in [0, 2] else word for i, word in enumerate(date_string.split())).replace('gmt', '+0000').replace('GMT', '+0000'),
+                '%a, %d %b %Y %H:%M:%S %z'
+        ).strftime('%Y-%m-%d %H:%M:%S')
+        )
+    except Exception as e:
+        logging.error(f"Error parsing date in 'published' column: {e}")
+        df['published'] = '1970-01-01 00:00:00'  # Значение по умолчанию при ошибке
+    logging.info('Cast published to DateTime... done.')
+
+    logging.info('Casting the columns types...')
+    try:
+        df['published'] = pd.to_datetime(df['published'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+        df['sentiment'] = df['sentiment'].astype('float64', errors='ignore')
+        df['id'] = df['id'].astype(str)
+        df['title'] = df['title'].astype(str)
+    except Exception as e:
+        logging.error(f"Error casting column types: {e}")
+    logging.info('Casting the columns types... done.')
+
+    logging.info('Columns transformation...')
+    try:
+        df.columns = [inflection.underscore(col) for col in df.columns]
+    except Exception as e:
+        logging.error(f"Error transforming columns: {e}")
+    logging.info('Columns transformation... done.')
+
+    logging.info('Drop duplicates...')
+    try:
+        df.drop_duplicates(subset=['id'], inplace=True)
+    except Exception as e:
+        logging.error(f"Error dropping duplicates: {e}")
+    logging.info('Drop duplicates... done.')
+
+    logging.info('Fill empty values...')
+    try:
+        numeric_columns = df.select_dtypes(include=['int64', 'float64', 'datetime64']).columns
+        string_columns = df.select_dtypes(include=['object']).columns
+        df[numeric_columns] = df[numeric_columns].fillna(0)
+        df[string_columns] = df[string_columns].fillna('N/A')
+    except Exception as e:
+        logging.error(f"Error filling empty values: {e}")
+    logging.info('Fill empty values... done.')
+
+    logging.info('Removing newlines and tabs...')
+    try:
+        df[string_columns] = df[string_columns].apply(lambda col: col.str.replace('\\n', ''))
+        df[string_columns] = df[string_columns].apply(lambda col: col.str.replace('\\t', ' '))
+        df[string_columns] = df[string_columns].apply(lambda col: col.str.replace(' {2,}', ' ', regex=True))
+        df[string_columns] = df[string_columns].apply(lambda col: col.str.strip())
+    except Exception as e:
+        logging.error(f"Error removing newlines and tabs: {e}")
+    logging.info('Removing newlines and tabs... done.')
+
+    logging.info('Delete emodji...')
+    try:
+        df = df.astype(str).map(lambda x: x.encode('ascii', 'ignore').decode('ascii'))
+    except Exception as e:
+        logging.error(f"Error deleting emodji: {e}")
+    logging.info('Delete emodji... done.')
+
+    logging.info('To lowercase...')
+    try:
+        df[string_columns] = df[string_columns].apply(lambda col: col.str.lower())
+    except Exception as e:
+        logging.error(f"Error converting to lowercase: {e}")
+    logging.info('To lowercase... done.')
+
+    logging.info('Transforming messages... done.')
+    return df
 
 def get_news():
     message_count = 0
@@ -75,7 +167,13 @@ def process_news():
     redis_hook = RedisHook(redis_conn_id='redis_conn')
     mongo_hook = MongoHook(mongo_conn_id='mongo_conn')
 
+    clickhouse_con = BaseHook.get_connection('clickhouse_conn')
+
+    client = clickhouse_connect.get_client(host=clickhouse_con.host,
+                                           port=clickhouse_con.port)
+
     def action_on_msg(ch, method, properties, body):
+
         # Use nonlocal to modify variables from the outer scope
         nonlocal message_count, messages, collection, sentiment_model
 
@@ -96,14 +194,17 @@ def process_news():
             try:
                 # Carefully handle potentially missing keys
                 content_value = msg.get("title", "")
-                if content_value:  # Analyze only if there is content
-                    msg['sentiment'] = sentiment_model(content_value)
+
+                if content_value:
+                    # Анализ настроения
+                    result = sentiment_model(content_value)
+                    msg['sentiment'] = result[0]['score'] if result[0]['label'] == 'POSITIVE' else -result[0]['score']
                 else:
                     logging.warning(f"No content found for sentiment analysis in message {msg.get('id', 'N/A')}")
                     msg['sentiment'] = None
             except Exception as e:
                 logging.error(f"Error during sentiment analysis for message {msg.get('id', 'N/A')}: {e}")
-                msg['sentiment'] = None  # Assign default value
+                msg['sentiment'] = None    
 
             # Check if message already exists
             msg_id = msg.get('id')
@@ -130,7 +231,8 @@ def process_news():
                     try:
                         logging.info(f"Inserting {len(messages)} new messages into MongoDB.")
                         collection.insert_many(messages, ordered=False)  # Use ordered=False to continue on duplicate errors
-                        messages.clear()  # Clear after successful/attempted insertion
+                        logging.info("Inserting messages into MongoDB... done.")
+
                     except pymongo.errors.BulkWriteError as bwe:
                         # Log details about duplicate keys and other errors
                         write_errors = bwe.details.get('writeErrors', [])
@@ -145,7 +247,22 @@ def process_news():
                         # Decide whether to keep messages for retry or clear them
                     except Exception as e:
                         logging.error(f"Error inserting messages into MongoDB: {e} (Type: {type(e).__name__})")
-                        # Decide whether to keep messages for retry or clear them
+
+                    try:
+                        df = transform_rss(messages)
+                        if not df.empty:
+                            logging.info("Inserting messages into ClickHouse...")
+                            client.insert_df(df=df,
+                                database='blockchain_db',
+                                table='crypto_news',
+                                column_names=['id', 'title', 'published', 'sentiment'])
+                            client.close()
+                            logging.info("Inserting messages into ClickHouse... done.")
+                    except Exception as e:
+                        logging.error(f"Error inserting messages into ClickHouse: {e} (Type: {type(e).__name__})")
+
+                    messages.clear()  # Clear after successful/attempted insertion
+                    # Decide whether to keep messages for retry or clear them
                 else:
                     logging.info("No new messages to insert.")
 
@@ -158,9 +275,17 @@ def process_news():
                     logging.warning(f"Failed to stop consumer (may be expected if connection is closed): {e}")
 
     try:
+        # logging.info("Initializing sentiment analysis model...")
+        # model = BertModel.from_pretrained('google-bert/bert-base-cased')
+        # sentiment_model = pipeline(task='sentiment-analysis', model=model)
+        # logging.info("Sentiment analysis model loaded.")
+
         logging.info("Initializing sentiment analysis model...")
-        model = BertModel.from_pretrained('google-bert/bert-base-cased')
-        sentiment_model = pipeline(task='sentiment-analysis', model=model)
+        # Загружаем модель и токенизатор для анализа настроений
+        model_name = "distilbert-base-uncased-finetuned-sst-2-english"  # Подходящая модель для sentiment-analysis
+        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        sentiment_model = pipeline(task='sentiment-analysis', model=model, tokenizer=tokenizer)
         logging.info("Sentiment analysis model loaded.")
 
         redis_conn = redis_hook.get_conn()
@@ -203,6 +328,7 @@ def process_news():
 
 
 default_args = {
+
     "owner": "user",
     "retries": 0,
     "catchup": False,
@@ -217,19 +343,9 @@ with DAG(dag_id='RSS',
          description='DAG for RSS ETL',
          default_args=default_args,
          catchup=False,
-         max_active_runs=1):
+         max_active_runs=1,
+         is_paused_upon_creation=False):
     start = EmptyOperator(task_id='start')
-
-    with TaskGroup(group_id='init', tooltip='Importing variables and connections') as init:
-        set_variables = BashOperator(
-            task_id='set_variables',
-            bash_command='airflow variables import /opt/airflow/variables.json'
-        )
-
-        set_connections = BashOperator(
-            task_id='set_connections',
-            bash_command='airflow connections import /opt/airflow/connections.json'
-        )
 
     get_news = PythonOperator(
         task_id='get_news',

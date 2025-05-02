@@ -19,7 +19,8 @@ with DAG(dag_id='Get_eth_data',
          description='DAG for getting ETH data',
          default_args=default_args,
          catchup=False,
-         max_active_runs=1):
+         max_active_runs=1,
+         is_paused_upon_creation=False):
 
     start = EmptyOperator(task_id='start')
 

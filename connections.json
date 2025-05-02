@@ -6,7 +6,7 @@
     "password": "password",
     "host": "postgres_prod",
     "port": 5432,
-    "schema": "test",
+    "schema": "blockchain_db",
     "extra": "{}"
  },
   "clickhouse_conn": {

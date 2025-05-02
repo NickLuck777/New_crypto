@@ -12,3 +12,5 @@ pymongo==4.11.3
 torch==2.6.0
 hf-xet==1.0.2
 pandas==2.2.3
+clickhouse-connect==0.8.15
+inflection==0.5.1

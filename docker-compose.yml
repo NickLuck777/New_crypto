@@ -53,28 +53,32 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: test
+      POSTGRES_DB: blockchain_db
     networks:
-      - crypto_network
+      crypto_network:
+        ipv4_address: 172.28.0.11
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+      - ./DATABASE/POSTGRES/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
 
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse_crypto
     networks:
-      - crypto_network
+      crypto_network:
+        ipv4_address: 172.28.0.12
     ports:
       - "8123:8123"
       - "9000:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./DATABASE/CLICKHOUSE/init/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     environment:
       - CLICKHOUSE_USER=default
       - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_DATABASE=blockchain_db
       - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
 
   redis:
@@ -222,7 +226,20 @@ services:
         fi
         mkdir -p /sources/logs /sources/dags /sources/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
-        exec /entrypoint airflow version
+        airflow db migrate
+        airflow users create --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
+                             --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow} \
+                             --firstname Admin --lastname User --role Admin --email admin@example.com
+
+        if [ -f /opt/airflow/variables.json ]; then
+            airflow variables import /opt/airflow/variables.json
+        fi
+
+        if [ -f /opt/airflow/connections.json ]; then
+            airflow connections import /opt/airflow/connections.json
+        fi
+
+        echo "Airflow init complete!"
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
@@ -302,7 +319,8 @@ services:
       - crypto_network
     ports:
       - "8083:8083"
-      - "9999:9999"  # Порт для JMX Exporter
+      - "9999:9999"
+    restart: always
     depends_on:
       - kafka
       - postgres_prod
@@ -325,16 +343,18 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components,/connectors"
+      CONNECT_TOPIC_CREATION_ENABLE: "true"
+      CONNECT_TOPIC_CREATION_DEFAULT_PARTITIONS: "1"
+      CONNECT_TOPIC_CREATION_DEFAULT_REPLICATION_FACTOR: "1"
       CONNECT_CONFIG_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
       CONNECT_OFFSET_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
       CONNECT_STATUS_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
-      # Добавляем JMX Exporter как Java Agent
       KAFKA_OPTS: "-javaagent:/usr/share/jmx_prometheus_javaagent.jar=9999:/etc/kafka/jmx_config.yml"
     volumes:
       - ./KAFKA-CONNECT/connectors:/connectors
       - ./KAFKA-CONNECT/plugins:/plugins
-      - ./jmx_prometheus_javaagent.jar:/usr/share/jmx_prometheus_javaagent.jar  # Путь к агенту
-      - ./jmx_config.yml:/etc/kafka/jmx_config.yml  # Путь к конфигу JMX
+      - ./jmx_prometheus_javaagent.jar:/usr/share/jmx_prometheus_javaagent.jar
+      - ./jmx_config.yml:/etc/kafka/jmx_config.yml
     command:
       - /bin/bash
       - -c
@@ -388,7 +408,6 @@ services:
     networks:
       - crypto_network
 
-  # Новый сервис: Prometheus
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus_crypto
@@ -406,7 +425,6 @@ services:
     networks:
       - crypto_network
 
-  # Новый сервис: Kafka Exporter
   kafka-exporter:
     image: danielqsj/kafka-exporter:latest
     container_name: kafka_exporter_crypto
@@ -414,18 +432,17 @@ services:
     ports:
       - "9308:9308"
     environment:
-      - KAFKA_BROKER=kafka:9092  # Указываем имя сервиса Kafka
+      - KAFKA_BROKER=kafka:9092
     networks:
       - crypto_network
 
-  # Новый сервис: PostgreSQL Exporter
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:latest
     container_name: postgres_exporter_crypto
     ports:
       - "9187:9187"
     environment:
-      - DATA_SOURCE_NAME=postgresql://user:password@rc1d-t1lz637ht7v0adzm.mdb.yandexcloud.net:6432/blockchain_pg?sslmode=require
+      - DATA_SOURCE_NAME=postgresql://user:password@postgres_prod:5432/blockchain_db?sslmode=disable
       - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/queries.yml
     volumes:
       - ./queries.yml:/etc/queries.yml
@@ -440,9 +457,13 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
     depends_on:
       - clickhouse
       - prometheus

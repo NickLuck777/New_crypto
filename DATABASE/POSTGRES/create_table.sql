@@ -1,11 +1,11 @@
-CREATE TABLE eth_transactions (
-    timestamp TIMESTAMP DEFAULT current_timestamp,
-    type BIGINT NULL,
+CREATE TABLE IF NOT EXISTS eth_transactions (
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    type INTEGER NULL,
     "chainId" VARCHAR,
     nonce VARCHAR,
     gas INTEGER NULL,
-    "maxFeePerGas" BIGINT NULL,          -- Allow NULL
-    "maxPriorityFeePerGas" BIGINT NULL, -- Allow NULL
+    "maxFeePerGas" BIGINT NULL,
+    "maxPriorityFeePerGas" BIGINT NULL,
     "to" VARCHAR,
     value BIGINT NULL,
     input TEXT,
@@ -18,12 +18,14 @@ CREATE TABLE eth_transactions (
     "blockNumber" INTEGER NULL,
     "transactionIndex" INTEGER NULL,
     "from" VARCHAR,
-    "gasPrice" BIGINT NULL                -- Allow NULL
+    "gasPrice" BIGINT NULL,
+    "blobVersionedHashes" VARCHAR[] NULL,
+    "maxFeePerBlobGas" BIGINT NULL
 );
 
+-- Добавление комментариев для документации
 COMMENT ON TABLE eth_transactions IS 'Table to store Ethereum transaction data retrieved from Kafka';
-
-COMMENT ON COLUMN eth_transactions.timestamp IS 'Time when the record was inserted into the table (database time)';
+COMMENT ON COLUMN eth_transactions.timestamp IS 'Time when the record was inserted into the table (UTC)';
 COMMENT ON COLUMN eth_transactions.type IS 'Ethereum transaction type';
 COMMENT ON COLUMN eth_transactions."chainId" IS 'Network chain ID';
 COMMENT ON COLUMN eth_transactions.nonce IS 'Transaction nonce';
@@ -43,5 +45,8 @@ COMMENT ON COLUMN eth_transactions."blockNumber" IS 'Block number';
 COMMENT ON COLUMN eth_transactions."transactionIndex" IS 'Transaction index within the block';
 COMMENT ON COLUMN eth_transactions."from" IS 'Sender address';
 COMMENT ON COLUMN eth_transactions."gasPrice" IS 'Gas price (for legacy transactions)';
+COMMENT ON COLUMN eth_transactions."blobVersionedHashes" IS 'Array of blob versioned hashes (EIP-4844)';
+COMMENT ON COLUMN eth_transactions."maxFeePerBlobGas" IS 'Maximum fee per blob gas (EIP-4844)';
 
-CREATE INDEX idx_timestamp ON eth_transactions (timestamp);
+-- Создание индекса для ускорения запросов по timestamp
+CREATE INDEX IF NOT EXISTS idx_timestamp ON eth_transactions (timestamp);

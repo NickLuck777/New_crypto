@@ -1,0 +1,8 @@
+# Игнорировать папки и их содержимое
+config/
+logs/
+plugins/
+PLAYGROUND/
+clickhouse/
+dags/__pycache__
+Notes/

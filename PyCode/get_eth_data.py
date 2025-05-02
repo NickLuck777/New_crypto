@@ -31,14 +31,15 @@ def serialize_with_schema(value):
     return json.dumps({"schema": schema, "payload": data}).encode('utf-8')
     
 
-def send_msg_to_kafka(trx):
-    future = producer.send('ethereum', value=trx, key=trx['hash'].hex())
-    record_metadata = future.get(timeout=10)
-    logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
-    
-    future = producer_clickhouse.send('ethereum_clickhouse', value=trx)
-    record_metadata = future.get(timeout=10)
-    logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
+def send_msg_to_kafka(trx_list):
+    for trx in trx_list:
+        future = producer.send('ethereum', value=trx, key=trx['hash'].hex())
+        record_metadata = future.get(timeout=10)
+        logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
+        
+        future = producer_clickhouse.send('ethereum_clickhouse', value=trx)
+        record_metadata = future.get(timeout=10)
+        logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
 
 # Configure logging
 logging.basicConfig(
@@ -105,19 +106,23 @@ logger.info(f"Last block number: {last_block_number}")
 trx_count = w3.eth.get_block_transaction_count(last_block_number)
 logger.info(f"Transaction count: {trx_count}")
 
+trx_list = []
+
 for i in range(trx_count):
     trx = w3.eth.get_transaction_by_block(last_block_number, i)
     trx = dict(trx)
     if 'accessList' in trx:
         del trx['accessList']
-        
-    # Send transaction to Kafka
-    try:
-        logger.info("Sending transaction to Kafka...")
-        send_msg_to_kafka(trx)
-    except Exception as e:
-        logger.error(f"Failed to send transaction to Kafka: {e}")
-        logger.error(traceback.format_exc())
+
+    trx_list.append(trx)
+
+# Send transaction to Kafka
+try:
+    logger.info("Sending transaction to Kafka...")
+    send_msg_to_kafka(trx_list)
+except Exception as e:
+    logger.error(f"Failed to send transaction to Kafka: {e}")
+    logger.error(traceback.format_exc())
 
 producer.flush()
 logger.info("Producer flushed")
