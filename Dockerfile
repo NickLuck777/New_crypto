@@ -22,7 +22,6 @@ RUN mkdir -p /opt/airflow/logs/py_scripts
 RUN chmod 777 /opt/airflow/logs/py_scripts
 
 COPY PyCode/get_eth_data.py /opt/airflow/py_scripts/get_eth_data.py
-#COPY dags/transform_md.py /opt/airflow/py_scripts/transform_md.py
 RUN chmod 755 /opt/airflow/py_scripts/*.py
 
 USER airflow

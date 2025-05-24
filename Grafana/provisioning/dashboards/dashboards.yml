@@ -1,9 +1,35 @@
 apiVersion: 1
 
 providers:
-  - name: 'Default'
+  # Провайдер для дашбордов с тегом Kafka
+  - name: 'Kafka'
     orgId: 1
-    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
+    searchTags:
+      - 'Kafka'
+
+  # Провайдер для дашбордов с тегом PG (PostgreSQL)
+  - name: 'PostgreSQL'
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
+    searchTags:
+      - 'PG'
+
+  # Провайдер для остальных дашбордов
+  - name: 'Other'
+    orgId: 1
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10

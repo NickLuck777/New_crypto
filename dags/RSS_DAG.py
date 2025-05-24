@@ -1,10 +1,9 @@
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.utils.task_group import TaskGroup
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.providers.redis.hooks.redis import RedisHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.hooks.base import BaseHook
 from airflow.models import Variable
 
@@ -18,7 +17,6 @@ import json
 import pendulum
 import logging
 import pymongo
-import clickhouse_connect
 import pandas as pd
 import inflection
 
@@ -48,7 +46,7 @@ def transform_rss(msgs):
 
     logging.info('Cast published to DateTime...')
     try:
-        # Приводим первые буквы дня недели и месяца к заглавным для соответствия формату
+        # Capitalize the first letters of the day of the week and month to match the format
         df['published'] = df['published'].apply(
             lambda date_string: datetime.strptime(
             ' '.join(word.capitalize() if i in [0, 2] else word for i, word in enumerate(date_string.split())).replace('gmt', '+0000').replace('GMT', '+0000'),
@@ -57,7 +55,7 @@ def transform_rss(msgs):
         )
     except Exception as e:
         logging.error(f"Error parsing date in 'published' column: {e}")
-        df['published'] = '1970-01-01 00:00:00'  # Значение по умолчанию при ошибке
+        df['published'] = '1970-01-01 00:00:00'  # Default value in case of error
     logging.info('Cast published to DateTime... done.')
 
     logging.info('Casting the columns types...')
@@ -154,7 +152,7 @@ def get_news():
     except pika.exceptions.AMQPConnectionError as e:
         logging.error(f"RabbitMQ connection error in get_news: {e}")
         raise  # Re-raise the exception to fail the task
-    except Exception as e:  # Перехватываем общее исключение для ошибок Redis или других
+    except Exception as e:  # Catch general exceptions for Redis or other errors
         logging.error(f"Redis or other error in get_news: {e} (Type: {type(e).__name__})")
         raise  # Re-raise the exception to fail the task
 
@@ -166,11 +164,7 @@ def process_news():
     collection = None
     redis_hook = RedisHook(redis_conn_id='redis_conn')
     mongo_hook = MongoHook(mongo_conn_id='mongo_conn')
-
-    clickhouse_con = BaseHook.get_connection('clickhouse_conn')
-
-    client = clickhouse_connect.get_client(host=clickhouse_con.host,
-                                           port=clickhouse_con.port)
+    postgres_hook = PostgresHook(postgres_conn_id='postgres_con')
 
     def action_on_msg(ch, method, properties, body):
 
@@ -196,7 +190,7 @@ def process_news():
                 content_value = msg.get("title", "")
 
                 if content_value:
-                    # Анализ настроения
+                    # Sentiment analysis
                     result = sentiment_model(content_value)
                     msg['sentiment'] = result[0]['score'] if result[0]['label'] == 'POSITIVE' else -result[0]['score']
                 else:
@@ -251,15 +245,11 @@ def process_news():
                     try:
                         df = transform_rss(messages)
                         if not df.empty:
-                            logging.info("Inserting messages into ClickHouse...")
-                            client.insert_df(df=df,
-                                database='blockchain_db',
-                                table='crypto_news',
-                                column_names=['id', 'title', 'published', 'sentiment'])
-                            client.close()
-                            logging.info("Inserting messages into ClickHouse... done.")
+                            logging.info("Inserting messages into Postgres...")
+                            postgres_hook.insert_rows(table='crypto_news', rows=df.values.tolist())
+                            logging.info("Inserting messages into Postgres... done.")
                     except Exception as e:
-                        logging.error(f"Error inserting messages into ClickHouse: {e} (Type: {type(e).__name__})")
+                        logging.error(f"Error inserting messages into Postgres: {e} (Type: {type(e).__name__})")
 
                     messages.clear()  # Clear after successful/attempted insertion
                     # Decide whether to keep messages for retry or clear them
@@ -275,14 +265,9 @@ def process_news():
                     logging.warning(f"Failed to stop consumer (may be expected if connection is closed): {e}")
 
     try:
-        # logging.info("Initializing sentiment analysis model...")
-        # model = BertModel.from_pretrained('google-bert/bert-base-cased')
-        # sentiment_model = pipeline(task='sentiment-analysis', model=model)
-        # logging.info("Sentiment analysis model loaded.")
 
         logging.info("Initializing sentiment analysis model...")
-        # Загружаем модель и токенизатор для анализа настроений
-        model_name = "distilbert-base-uncased-finetuned-sst-2-english"  # Подходящая модель для sentiment-analysis
+        model_name = "distilbert-base-uncased-finetuned-sst-2-english"
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         sentiment_model = pipeline(task='sentiment-analysis', model=model, tokenizer=tokenizer)

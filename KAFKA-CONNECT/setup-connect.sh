@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "Waiting for Kafka Connect to start..."
-sleep 30  # Увеличиваем время ожидания до 30 секунд
+sleep 30  # Increase waiting time to 30 seconds
 
-# Проверка доступности Kafka Connect
+# Check if Kafka Connect is available
 echo "Checking if Kafka Connect is available..."
 MAX_ATTEMPTS=30
 ATTEMPT=0
@@ -21,12 +21,11 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
     exit 1
 fi
 
-# Регистрация Sink коннекторов
+# Register Sink connectors
 echo "Configuring PostgreSQL sink connector..."
 curl -X POST -H "Content-Type: application/json" --data @/etc/kafka-connect/connectors/postgres-sink.json http://localhost:8083/connectors
 
-
 echo "Kafka Connect connectors configured."
 
-# Держим скрипт запущенным, чтобы контейнер не завершился
+# Keep the script running to prevent the container from exiting
 tail -f /dev/null

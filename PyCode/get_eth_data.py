@@ -27,7 +27,6 @@ def validate_msg(d):
 
 def serialize_with_schema(value):
     data = validate_msg(value)  # Validate and convert messages's values
-    #logger.info(f"Serialized data before JSON: {data}")
     return json.dumps({"schema": schema, "payload": data}).encode('utf-8')
     
 
@@ -37,9 +36,6 @@ def send_msg_to_kafka(trx_list):
         record_metadata = future.get(timeout=10)
         logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
         
-        future = producer_clickhouse.send('ethereum_clickhouse', value=trx)
-        record_metadata = future.get(timeout=10)
-        logger.info(f"Transaction sent to Kafka: Topic={record_metadata.topic}, Partition={record_metadata.partition}, Offset={record_metadata.offset}")
 
 # Configure logging
 logging.basicConfig(
@@ -88,11 +84,6 @@ producer = KafkaProducer(
     key_serializer=lambda k: k.encode('utf-8')
 )
 
-producer_clickhouse = KafkaProducer(
-    bootstrap_servers='172.28.0.10:9092',
-    value_serializer=lambda k: json.dumps(k).encode('utf-8')
-)
-
 logger.info("The producer has been initialized.")
 
 w3 = Web3(HTTPProvider("https://eth-mainnet.g.alchemy.com/v2/2wrUporcMxcIMvRrpuVaBYWFmeh_Mo7y"))
@@ -126,6 +117,3 @@ except Exception as e:
 
 producer.flush()
 logger.info("Producer flushed")
-
-producer_clickhouse.flush()
-logger.info("Producer_clickhouse flushed")

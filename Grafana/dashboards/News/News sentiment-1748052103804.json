@@ -18,13 +18,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 12,
+  "id": 2,
   "links": [],
   "panels": [
     {
       "datasource": {
-        "type": "grafana-clickhouse-datasource",
-        "uid": "clickhouse"
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres"
       },
       "description": "News sentiment",
       "fieldConfig": {
@@ -105,25 +105,31 @@
       "targets": [
         {
           "datasource": {
-            "type": "grafana-clickhouse-datasource",
-            "uid": "clickhouse"
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres"
           },
-          "editorType": "sql",
-          "format": 1,
-          "meta": {
-            "builderOptions": {
-              "columns": [],
-              "database": "",
-              "limit": 1000,
-              "mode": "list",
-              "queryType": "table",
-              "table": ""
-            }
-          },
-          "pluginVersion": "4.8.2",
-          "queryType": "table",
-          "rawSql": "SELECT \r\n   avg(sentiment) AS avg_sum_sentiment,\r\n   toStartOfMinute(toDateTime(published)) AS minute_start\r\nFROM \r\n   blockchain_db.crypto_news\r\nGROUP BY \r\n   minute_start\r\norder by\r\n\tminute_start desc;",
-          "refId": "A"
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n   avg(sentiment) AS avg_sum_sentiment,\r\n   date_trunc('minute', to_timestamp(published, 'YYYY-MM-DD HH24:MI:SS')) as time_line\r\nFROM \r\n   crypto_news\r\nGROUP BY \r\n   time_line\r\norder by\r\n\ttime_line desc;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "News sentiment",
@@ -133,7 +139,7 @@
   "preload": false,
   "schemaVersion": 41,
   "tags": [
-    "CH"
+    "PG"
   ],
   "templating": {
     "list": []
@@ -144,7 +150,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Clickhouse",
+  "title": "News sentiment",
   "uid": "eekjuusayigw0e",
-  "version": 4
+  "version": 3
 }

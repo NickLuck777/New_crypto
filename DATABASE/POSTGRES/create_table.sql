@@ -1,3 +1,4 @@
+-- Create table for storing Ethereum transactions
 CREATE TABLE IF NOT EXISTS eth_transactions (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     type INTEGER NULL,
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS eth_transactions (
     "maxFeePerBlobGas" BIGINT NULL
 );
 
--- Добавление комментариев для документации
+-- Add comments for documentation
 COMMENT ON TABLE eth_transactions IS 'Table to store Ethereum transaction data retrieved from Kafka';
 COMMENT ON COLUMN eth_transactions.timestamp IS 'Time when the record was inserted into the table (UTC)';
 COMMENT ON COLUMN eth_transactions.type IS 'Ethereum transaction type';
@@ -48,5 +49,23 @@ COMMENT ON COLUMN eth_transactions."gasPrice" IS 'Gas price (for legacy transact
 COMMENT ON COLUMN eth_transactions."blobVersionedHashes" IS 'Array of blob versioned hashes (EIP-4844)';
 COMMENT ON COLUMN eth_transactions."maxFeePerBlobGas" IS 'Maximum fee per blob gas (EIP-4844)';
 
--- Создание индекса для ускорения запросов по timestamp
+-- Create index for faster queries
 CREATE INDEX IF NOT EXISTS idx_timestamp ON eth_transactions (timestamp);
+
+-- Create table for storing crypto news
+CREATE TABLE IF NOT EXISTS crypto_news (
+    id varchar,
+    title varchar,
+    published varchar,
+    sentiment Float,
+    insertion_date timestamp default now()
+);
+
+-- Add comments for documentation
+COMMENT ON TABLE crypto_news IS 'Table to store processed crypto-related news with sentiment score.';
+
+COMMENT ON COLUMN crypto_news.id IS 'Unique identifier of the news item.';
+COMMENT ON COLUMN crypto_news.title IS 'Title or headline of the news article.';
+COMMENT ON COLUMN crypto_news.published IS 'Original publication timestamp of the article (as string).';
+COMMENT ON COLUMN crypto_news.sentiment IS 'Sentiment score of the article (e.g., -1 to 1).';
+COMMENT ON COLUMN crypto_news.insertion_date IS 'Timestamp when the record was inserted into the table (UTC).';

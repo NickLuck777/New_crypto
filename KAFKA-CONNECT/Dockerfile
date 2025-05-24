@@ -2,13 +2,12 @@ FROM confluentinc/cp-kafka-connect:latest
 
 USER root
 
-# Установка необходимых коннекторов
+# Install the necessary connectors
 RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:latest 
-#RUN confluent-hub install --no-prompt ./clickhouse-kafka-connect-v1.2.9-confluent.jar
 
-# Копирование скрипта для автоматической настройки
+# Copy the setup script
 COPY setup-connect.sh /usr/local/bin/setup-connect.sh
 RUN chmod +x /usr/local/bin/setup-connect.sh
 
-# Копирование конфигураций коннекторов
+# Copy the connector configurations
 COPY connectors/ /etc/kafka-connect/connectors/
