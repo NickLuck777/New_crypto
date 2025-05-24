@@ -125,6 +125,8 @@ To check the results of the work of the dags we can use Grafana dashboards or ch
 Access Grafana at http://localhost:3000/dashboards
 Default credentials are username: `admin`, password: `admin`.
 
+Access Prometheus at http://localhost:9090/
+
 ## Project Structure
 
 - `dags/`: Contains Airflow DAG definitions for workflows.
