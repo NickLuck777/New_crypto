@@ -26,6 +26,18 @@ providers:
       foldersFromFilesStructure: true
     searchTags:
       - 'PG'
+  # Провайдер для дашбордов с тегом ClickHouse
+  - name: 'ClickHouse'
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
+    searchTags:
+      - 'ClickHouse'
 
   # Провайдер для остальных дашбордов
   - name: 'Other'

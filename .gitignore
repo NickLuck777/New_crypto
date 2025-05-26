@@ -3,6 +3,5 @@ config/
 logs/
 plugins/
 PLAYGROUND/
-clickhouse/
 dags/__pycache__
 Notes/
