@@ -103,7 +103,7 @@ Ensure Docker and Docker Compose are installed on your system. Then, build and r
    docker build -t kafka-connect-custom .
    cd ../
    docker build -t airflow-custom .
-   docker-compose up --build
+   docker-compose up -d --build
    ```
 
 P.S. airflow-custom image creation may take a while (PyTorch is heavy). Please, be patient.
