@@ -306,6 +306,7 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
       - kafka_data:/bitnami/kafka
     command: 
@@ -332,6 +333,9 @@ services:
       CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
       CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
       CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_CONFIG_STORAGE_CLEANUP_POLICY: "compact"
+      CONNECT_OFFSET_STORAGE_CLEANUP_POLICY: "compact"
+      CONNECT_STATUS_STORAGE_CLEANUP_POLICY: "compact"
       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
@@ -346,9 +350,6 @@ services:
       CONNECT_TOPIC_CREATION_ENABLE: "true"
       CONNECT_TOPIC_CREATION_DEFAULT_PARTITIONS: "1"
       CONNECT_TOPIC_CREATION_DEFAULT_REPLICATION_FACTOR: "1"
-      CONNECT_CONFIG_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
-      CONNECT_OFFSET_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
-      CONNECT_STATUS_STORAGE_TOPIC_CLEANUP_POLICY: "compact"
       KAFKA_OPTS: "-javaagent:/usr/share/jmx_prometheus_javaagent.jar=9999:/etc/kafka/jmx_config.yml"
     volumes:
       - ./KAFKA-CONNECT/connectors:/connectors
