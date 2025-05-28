@@ -1,6 +1,6 @@
 x-airflow-common:
   &airflow-common
-  image: ${AIRFLOW_IMAGE_NAME:-airflow-custom:latest}
+  image: ${AIRFLOW_IMAGE_NAME:-nickluck777/airflow-custom:1.0}
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -289,7 +289,7 @@ services:
         condition: service_completed_successfully
 
   kafka:
-    image: kafka-custom:latest
+    image: nickluck777/kafka-custom:1.0
     ports:
       - "9092:9092"
       - "9093:9093"
@@ -315,7 +315,7 @@ services:
       - "/usr/local/bin/kafka-setup.sh & /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh"
 
   kafka-connect:
-    image: kafka-connect-custom:latest
+    image: nickluck777/kafka-connect-custom:1.0
     networks:
       - crypto_network
     ports:

@@ -90,19 +90,13 @@ Below is a list of key Python libraries used in this project along with their ve
 1. **Clone the Repository**: 
    ```bash
    git clone https://github.com/NickLuck777/New_crypto.git
-   cd New_crypto
    ```
 
 2. **Docker Setup**: 
 Ensure Docker and Docker Compose are installed on your system. Then, build and run the containers:
 
    ```bash
-   cd KAFKA
-   docker build -t kafka-custom .
-   cd ../KAFKA-CONNECT
-   docker build -t kafka-connect-custom .
-   cd ../
-   docker build -t airflow-custom .
+   cd New_crypto
    docker compose up -d --build
    ```
 

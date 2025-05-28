@@ -5,3 +5,4 @@ plugins/
 PLAYGROUND/
 dags/__pycache__
 Notes/
+DEBUG/
