@@ -23,11 +23,7 @@ P.S. airflow-custom образ создается долго (PyTorch тяжел
 
 ## Системная архитектура
 
-graph TD
-    A[RSS News] -->|Stream| B[RabbitMQ]
-    B -->|Split| C[MongoDB]
-    B -->|Split| D[Postgres]
-    D -->|Transfer| E[ClickHouse]
+![Системная архитектура](schema.png)
 
 ##  Описание дагов Airflow
 
