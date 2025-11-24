@@ -64,7 +64,7 @@ services:
       - ./DATABASE/POSTGRES/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:head-alpine
     container_name: clickhouse_crypto
     networks:
       crypto_network:
@@ -362,7 +362,7 @@ services:
       - "/usr/local/bin/setup-connect.sh & /etc/confluent/docker/run"
 
   redis_user:
-    image: redis:latest
+    image: redis:alpine3.22
     container_name: redis_crypto
     restart: always
     networks:
@@ -374,7 +374,7 @@ services:
     command: [ "redis-server", "--port", "6378", "--appendonly", "yes" ]
 
   mongo:
-    image: mongo:latest
+    image: mongo:noble
     ports:
       - "27017:27017"
     networks:
@@ -385,7 +385,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: 123
 
   mongo-express:
-    image: mongo-express:latest
+    image: mongo-express:1.0.2-20-alpine3.19
     restart: always
     networks:
       - crypto_network
@@ -398,19 +398,18 @@ services:
       ME_CONFIG_BASICAUTH: false
 
   rabbitmq:
-    image: 'bitnami/rabbitmq:latest'
+    image: 'rabbitmq:management-alpine'
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_USERNAME: nick
-      RABBITMQ_PASSWORD: nick
-      RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS: true
+      RABBITMQ_DEFAULT_USER: nick
+      RABBITMQ_DEFAULT_PASS: nick
     networks:
       - crypto_network
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.8.0-rc.0
     container_name: prometheus_crypto
     ports:
       - "9090:9090"
@@ -427,7 +426,7 @@ services:
       - crypto_network
 
   kafka-exporter:
-    image: danielqsj/kafka-exporter:latest
+    image: danielqsj/kafka-exporter
     container_name: kafka_exporter_crypto
     restart: on-failure
     ports:
@@ -452,7 +451,7 @@ services:
 
   
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:main-ubuntu
     container_name: grafana_crypto
     ports:
       - "3000:3000"
