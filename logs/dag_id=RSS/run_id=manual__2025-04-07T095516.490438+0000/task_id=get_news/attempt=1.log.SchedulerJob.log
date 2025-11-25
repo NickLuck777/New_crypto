@@ -1,1 +1,0 @@
-[2025-04-07T09:55:24.381+0000] {scheduler_job_runner.py:769} ERROR - Executor reports task instance <TaskInstance: RSS.get_news manual__2025-04-07T09:55:16.490438+00:00 [queued]> finished (failed) although the task says it's queued. (Info: None) Was the task killed externally?
