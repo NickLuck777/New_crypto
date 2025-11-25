@@ -1,5 +1,0 @@
-Всякие крутые мысли по проекту:
-1. Telegram пользователя и почту, куда слать уведломения и алёрты, хранить в переменных Aitflow для быстрого доступа проверяющим. Отразить в README.md.
-
-cd C:\Data_engineer\WindSurf\CryptoETL
-.\.venv\Scripts\activate
